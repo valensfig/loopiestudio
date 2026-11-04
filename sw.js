@@ -1,11 +1,11 @@
 /* ================================================================
-   LOOPIESTUDIO — sw.js v6 (Service Worker Completo)
+   LOOPIESTUDIO — sw.js v7 (Fuerza Actualización CSS y SVGs)
    ================================================================ */
-const CACHE_NAME = 'loopiestudio-v6';
+const CACHE_NAME = 'loopiestudio-v7';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './style.css',
+  './style.css?v=2',
   './app.js',
   './manifest.json'
 ];
