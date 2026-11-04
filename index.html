@@ -3,183 +3,356 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>LoopieStudio</title>
+  <link rel="manifest" href="./manifest.json?v=3" />
   <meta name="theme-color" content="#fdf4f0" />
-  <meta name="description" content="LoopieStudio — Tu estudio creativo de crochet." />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <title>LoopieStudio — Estación de Trabajo</title>
-  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="./style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet" />
 </head>
 <body>
-<div id="app">
 
-  <header class="app-header" id="appHeader">
-    <div class="header-inner">
-      <div class="header-logo"><span class="logo-yarn">🧶</span><span class="logo-text">LoopieStudio</span></div>
-      <div class="header-actions">
-        <button class="icon-btn" id="btnPalette" aria-label="Generador de paleta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="1.5" fill="currentColor"/><circle cx="17.5" cy="10.5" r="1.5" fill="currentColor"/><circle cx="8.5" cy="7.5" r="1.5" fill="currentColor"/><circle cx="6.5" cy="12.5" r="1.5" fill="currentColor"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c.84 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.97-4.48-9-9-9z"/></svg></button>
-        <button class="lang-btn" id="btnLang"><span data-i18n="lang.es">ES</span><span class="lang-sep">/</span><span data-i18n="lang.en">EN</span></button>
-        <button class="icon-btn theme-toggle" id="btnTheme"><svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg><svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
-      </div>
+  <!-- BARRA SUPERIOR -->
+  <header class="app-header">
+    <div class="header-logo">
+      <span class="logo-icon">🧶</span>
+      <h1 class="logo-title">LoopieStudio</h1>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="btnPalette" title="Paleta de colores">🎨</button>
+      <button class="lang-toggle" id="btnLang">
+        <span class="lang-label" data-i18n="lang.es">ES</span> / <span class="lang-label" data-i18n="lang.en">EN</span>
+      </button>
+      <button class="icon-btn" id="btnTheme" title="Cambiar tema">🌓</button>
     </div>
   </header>
-  
-  <div class="palette-strip" id="paletteStrip">
-    <div class="palette-inner">
+
+  <!-- PALETA DE COLORES DESPLEGABLE -->
+  <section class="palette-strip" id="paletteStrip">
+    <div class="palette-info">
       <span class="palette-label" data-i18n="palette.label">✨ Paleta sugerida</span>
-      <div class="palette-dots" id="paletteDots">
-        <div class="palette-dot" id="palDot0"></div><div class="palette-dot" id="palDot1"></div><div class="palette-dot" id="palDot2"></div>
+      <div class="palette-dots">
+        <span class="pal-dot" id="palDot0"></span>
+        <span class="pal-dot" id="palDot1"></span>
+        <span class="pal-dot" id="palDot2"></span>
       </div>
-      <button class="palette-refresh-btn" id="btnPaletteRefresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.17"/></svg><span data-i18n="palette.btn">Nueva</span></button>
     </div>
-  </div>
+    <button class="palette-refresh-btn" id="btnPaletteRefresh" data-i18n="palette.btn">Nueva</button>
+  </section>
 
-  <main class="main-content" id="mainContent">
-    <section class="view active" id="viewWorkstation" role="main">
-      <div class="workstation-top">
-        <div class="panel video-panel collapsible-panel" id="videoPanel">
-          <div class="panel-header toggle-header" id="videoToggleHeader">
-            <span class="panel-icon">🎬</span><span class="panel-title" data-i18n="panel.tutorial">Tutorial</span>
-            <div class="panel-header-right"><button class="panel-action-btn" id="btnChangeVideo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button><svg class="panel-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
+  <!-- VISTA 1: ESPACIO DE TRABAJO (TALLER) -->
+  <main class="view-panel active" id="viewWorkstation">
+    <!-- PANEL DE VIDEO / TUTORIAL -->
+    <section class="video-accordion">
+      <header class="accordion-header" id="videoToggleHeader">
+        <div class="accordion-title">
+          <span>🎬</span> <span data-i18n="panel.tutorial">Tutorial</span>
+        </div>
+        <div class="accordion-controls">
+          <button class="btn-change-video" id="btnChangeVideo" data-i18n="btn.changeLink">Cambiar enlace</button>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </header>
+      <div class="accordion-body" id="videoCollapseBody">
+        <div class="video-container" id="videoWrapper">
+          <div class="video-placeholder" id="videoPlaceholder">
+            <span class="placeholder-icon">📺</span>
+            <p>Vincula un tutorial de YouTube o redes sociales</p>
+            <button class="btn-secondary" id="btnAddVideo" data-i18n="btn.addTutorial">Agregar tutorial</button>
           </div>
-          <div class="panel-collapse-body" id="videoCollapseBody">
-            <div class="video-embed-wrapper" id="videoWrapper">
-                <div class="video-placeholder" id="videoPlaceholder"><div class="video-placeholder-inner"><div class="play-icon-bg"><svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><p class="video-placeholder-text">YouTube · TikTok · Instagram · Pinterest</p><button class="add-video-btn" id="btnAddVideo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span data-i18n="btn.addTutorial">Agregar tutorial</span></button></div></div>
-                <div class="external-link-wrapper" id="externalLinkWrapper" style="display:none"><div class="external-link-inner"><span class="external-link-icon" id="externalIcon">📱</span><p class="external-link-platform" id="externalPlatform">Red Social</p><p class="external-link-hint" data-i18n="video.hint">El video no se puede embeber aquí</p><a class="open-external-btn" id="openExternalBtn" href="#" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg><span data-i18n="btn.openApp">Abrir video en la App</span></a><button class="change-video-link" id="btnChangeExternal" data-i18n="btn.changeLink">Cambiar enlace</button></div></div>
+          <div class="external-link-panel" id="externalLinkWrapper" style="display: none;">
+            <span class="external-icon" id="externalIcon">🔗</span>
+            <p id="externalPlatform">Red social detectada</p>
+            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-primary" id="openExternalBtn" data-i18n="btn.openApp">Abrir video en la App</a>
+            <button class="btn-text" id="btnChangeExternal" data-i18n="btn.changeLink">Cambiar enlace</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL DEL PATRÓN -->
+    <section class="pattern-panel">
+      <div class="pattern-header-bar">
+        <div class="pattern-tag">
+          <span>📋</span> <span data-i18n="panel.pattern">Patrón</span>
+        </div>
+        <div class="pattern-header-actions">
+          <button class="btn-action-sm" id="btnTranslate">🌐 ES/EN</button>
+          <span class="badge" id="patternProgressBadge">V. 1</span>
+        </div>
+      </div>
+      <div class="pattern-content" id="patternContent">
+        <div class="pattern-intro">
+          <h3 class="pattern-name" id="wsProjName">Cargando proyecto...</h3>
+          <p class="pattern-meta" id="wsProjMeta">Principiante · Aguja 2.5mm</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTADOR DE VUELTAS Y PUNTOS FLOTANTE -->
+    <footer class="counter-dock">
+      <div class="counter-top-row">
+        <div class="counter-timer-pill">
+          <span id="timerDisplay">00:00:00</span>
+          <button id="btnTimerToggle" class="timer-play-btn">▶️</button>
+        </div>
+        <span class="counter-project-name" id="wsCounterName">Proyecto</span>
+        <button class="icon-btn-ghost" id="btnReset" title="Reiniciar vuelta">🔄</button>
+      </div>
+
+      <div class="counter-main-box">
+        <div class="round-control-row">
+          <button class="counter-btn round-btn" id="btnMinus">−</button>
+          <div class="counter-indicator">
+            <span class="counter-label" data-i18n="counter.current">VUELTA ACTUAL</span>
+            <div class="counter-numbers">
+              <span class="counter-huge" id="counterNumber">1</span>
+              <span class="counter-sub" id="counterTotal">de 1</span>
             </div>
           </div>
+          <button class="counter-btn round-btn" id="btnPlus">+</button>
         </div>
-
-        <div class="panel pattern-panel" id="patternPanel">
-          <div class="panel-header"><span class="panel-icon">📋</span><span class="panel-title" data-i18n="panel.pattern">Patrón</span><div class="panel-header-right"><span class="pattern-progress-badge" id="patternProgressBadge">V. 1</span><button class="panel-action-btn translate-btn" id="btnTranslate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8l6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg></button></div></div>
-          <div class="pattern-scroll-area" id="patternScrollArea">
-            <div class="pattern-content" id="patternContent">
-              <div class="pattern-intro"><h3 class="pattern-name" id="wsProjName">🌸 Flor Granny Square</h3><p class="pattern-meta" id="wsProjMeta">Principiante · Aguja 4.0mm</p></div>
-              <div class="pattern-phase"><button class="phase-toggle" data-target="phase-mat" aria-expanded="true"><span class="phase-label"><span class="phase-ico">🧵</span> <span data-i18n="phase.materials">Detalles</span></span><svg class="phase-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button><div class="phase-body" id="phase-mat"><ul class="pattern-list" id="wsProjTags"><li><span data-i18n="mat.tools">Cargando patrón...</span></li></ul></div></div>
-              <div class="pattern-phase"><button class="phase-toggle" data-target="phase-centro" aria-expanded="true"><span class="phase-label"><span class="phase-ico">🌸</span> <span data-i18n="phase.center">Instrucciones</span></span><svg class="phase-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button><div class="phase-body" id="phase-centro"><div class="pattern-rounds" id="patternRounds">
-                    <div class="pattern-round" data-round="1" id="round-1"><div class="round-header"><span class="round-number" data-i18n="round.1">Vuelta 1</span><span class="round-stitches">Inicio</span></div><p class="round-instructions">Cargando instrucciones...</p></div>
-              </div></div></div>
-            </div>
-          </div>
+        <div class="counter-progress-bar">
+          <div class="counter-progress-fill" id="counterProgressFill"></div>
         </div>
       </div>
 
-      <div class="workstation-bottom" id="workstationBottom">
-        <div class="counter-section">
-          <div class="counter-top-bar">
-            <div class="counter-project-info"><span class="counter-project-name" id="wsCounterName">Flor Granny Square</span><span class="counter-project-status" data-i18n="status.wip">En progreso</span></div>
-            <div class="timer-widget" id="timerWidget"><span class="timer-display" id="timerDisplay">00:00:00</span><button class="timer-btn play" id="btnTimerToggle">▶️</button></div>
-            <button class="reset-btn" id="btnReset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.17"/></svg></button>
-          </div>
-          <div class="counter-display-wrapper"><div class="counter-label-row"><span class="counter-label" data-i18n="counter.current">VUELTA ACTUAL</span><span class="counter-total" id="counterTotal">de 7</span></div><div class="counter-display"><span class="counter-number" id="counterNumber">1</span></div><div class="counter-progress-bar"><div class="counter-progress-fill" id="counterProgressFill" style="width:14.28%"></div></div></div>
-          <div class="counter-controls">
-            <button class="counter-btn counter-btn-minus" id="btnMinus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-            <div class="counter-center-display"><div class="stitch-counter-mini"><span class="stitch-label" data-i18n="counter.stitches">PUNTOS</span><div class="stitch-mini-controls"><button class="stitch-btn" id="btnStitchMinus">−</button><span class="stitch-count" id="stitchCount">0</span><button class="stitch-btn" id="btnStitchPlus">+</button></div></div></div>
-            <button class="counter-btn counter-btn-plus" id="btnPlus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-          </div>
-          <div class="counter-quick-notes"><input type="text" class="quick-note-input" id="quickNoteInput" placeholder="📝 Nota rápida..." maxlength="120" /></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="view" id="viewProjects" role="main">
-      <div class="view-content-pad">
-        <div class="view-hero"><h2 class="view-title" data-i18n="view.projects">Proyectos</h2><button class="fab-inline" id="btnNewProject"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span data-i18n="btn.new">Nuevo</span></button></div>
-        <div class="project-tabs" role="tablist"><button class="project-tab active-tab" data-tab="todo" data-i18n="tab.todo">Por hacer</button><button class="project-tab" data-tab="wip" data-i18n="tab.wip">En proceso</button><button class="project-tab" data-tab="redo" data-i18n="tab.redo">Volviendo</button></div>
-        <div class="projects-grid tab-panel active-panel" id="tab-todo"></div>
-        <div class="projects-grid tab-panel" id="tab-wip"></div>
-        <div class="projects-grid tab-panel" id="tab-redo"></div>
-      </div>
-    </section>
-
-    <section class="view" id="viewMaterials" role="main">
-      <div class="view-content-pad">
-        <div class="view-hero"><h2 class="view-title" data-i18n="view.materials">Mis Hilos</h2><button class="fab-inline" id="btnAddThread"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span data-i18n="btn.add">Agregar</span></button></div>
-        <div class="materials-list" id="materialsList"></div>
-      </div>
-    </section>
-
-    <section class="view" id="viewCalculator" role="main">
-      <div class="view-content-pad">
-        <div class="view-hero"><h2 class="view-title" data-i18n="calc.tabTitle">Calculadora</h2></div>
-        <div class="calc-panel">
-          <div class="calc-header"><span class="calc-emoji">💰</span><span class="calc-title" data-i18n="calc.title">Cierre de Proyecto</span></div>
-          <div class="calc-fields">
-            <div class="calc-row"><label class="calc-label" data-i18n="calc.yarnSmart">🧵 Precio de madeja ÷ Gramos totales</label><div class="calc-double"><div class="calc-input-wrap"><span class="calc-prefix">$</span><input type="number" class="calc-input" id="calcYarnPrice" placeholder="0.00" min="0" step="0.01" /></div><span class="calc-x">÷</span><input type="number" class="calc-input calc-input-sm" id="calcYarnTotalG" placeholder="100g" min="1" step="1" /></div></div>
-            <div class="calc-row"><label class="calc-label" data-i18n="calc.yarnUsed">⚖️ Gramos usados en tu tejido</label><div class="calc-double"><input type="number" class="calc-input calc-input-sm" id="calcYarnUsedG" placeholder="g" min="0" step="1" /><span class="calc-x">➔</span><span class="calc-val" id="calcYarnCostResult" style="color: var(--rose-500);">$0.00</span></div></div>
-            <div class="calc-row"><label class="calc-label" data-i18n="calc.labor">⏱ Horas &times; tarifa/hr</label><div class="calc-double"><input type="number" class="calc-input calc-input-sm" id="calcHours" placeholder="hrs" min="0" step="0.5" /><span class="calc-x">×</span><div class="calc-input-wrap"><span class="calc-prefix">$</span><input type="number" class="calc-input" id="calcRate" placeholder="tarifa" min="0" step="0.5" /></div></div></div>
-            <div class="calc-row"><label class="calc-label" data-i18n="calc.extras">📦 Materiales extras</label><div class="calc-input-wrap"><span class="calc-prefix">$</span><input type="number" class="calc-input" id="calcExtras" placeholder="0.00" min="0" step="0.01" /></div></div>
-            <div class="calc-row"><label class="calc-label" data-i18n="calc.price">🏷️ Precio final de venta</label><div class="calc-input-wrap"><span class="calc-prefix">$</span><input type="number" class="calc-input" id="calcPrice" placeholder="0.00" min="0" step="0.01" /></div></div>
-          </div>
-          <div class="calc-result" id="calcResult"><div class="calc-result-row"><span data-i18n="calc.total">Costo total:</span><span class="calc-val" id="calcTotal">$0.00</span></div><div class="calc-result-row profit-row"><span data-i18n="calc.profit">Ganancia neta:</span><span class="calc-val profit" id="calcProfit">$0.00</span></div></div>
-          <div class="calc-actions">
-            <button class="calc-btn" id="btnCalc" data-i18n="btn.calculate">Calcular</button>
-            <button class="calc-btn calc-btn-outline" id="btnCopyQuote" style="display:none;" data-i18n="btn.copyQuote">📲 WhatsApp</button>
+      <div class="counter-bottom-row">
+        <div class="stitch-pill">
+          <span class="stitch-label" data-i18n="counter.stitches">PUNTOS</span>
+          <div class="stitch-controls">
+            <button class="stitch-btn" id="btnStitchMinus">−</button>
+            <span class="stitch-val" id="stitchCount">0</span>
+            <button class="stitch-btn" id="btnStitchPlus">+</button>
           </div>
         </div>
+        <input type="text" class="quick-note-input" id="quickNoteInput" placeholder="📝 Nota para vuelta 1..." />
       </div>
-    </section>
-
-    <section class="view" id="viewGlossary" role="main">
-      <div class="view-content-pad">
-        <div class="view-hero"><h2 class="view-title" data-i18n="view.glossary">Glosario</h2></div>
-        <div class="glossary-search-wrap"><svg class="glossary-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="search" class="glossary-search" id="glossarySearch" placeholder="Buscar punto..." autocomplete="off" /></div>
-        <div class="glossary-list" id="glossaryList"></div>
-      </div>
-    </section>
-
+    </footer>
   </main>
 
-  <nav class="bottom-nav" id="bottomNav" role="navigation">
-    <button class="nav-item active-nav" id="navWorkstation" data-view="viewWorkstation"><div class="nav-icon-wrap"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><span class="nav-dot"></span></div><span class="nav-label" data-i18n="nav.work">Trabajo</span></button>
-    <button class="nav-item" id="navProjects" data-view="viewProjects"><div class="nav-icon-wrap"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span class="nav-dot"></span></div><span class="nav-label" data-i18n="nav.projects">Proyectos</span></button>
-    <button class="nav-item" id="navMaterials" data-view="viewMaterials"><div class="nav-icon-wrap"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg><span class="nav-dot"></span></div><span class="nav-label" data-i18n="nav.yarns">Hilos</span></button>
-    <button class="nav-item" id="navCalculator" data-view="viewCalculator"><div class="nav-icon-wrap"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="14" y1="18" x2="16" y2="18"/></svg><span class="nav-dot"></span></div><span class="nav-label" data-i18n="nav.calc">Calculadora</span></button>
-    <button class="nav-item" id="navGlossary" data-view="viewGlossary"><div class="nav-icon-wrap"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span class="nav-dot"></span></div><span class="nav-label" data-i18n="nav.glossary">Glosario</span></button>
+  <!-- VISTA 2: PROYECTOS -->
+  <main class="view-panel" id="viewProjects">
+    <header class="section-header">
+      <h2 data-i18n="view.projects">Proyectos</h2>
+      <button class="btn-primary" id="btnNewProject">+ <span data-i18n="btn.new">Nuevo</span></button>
+    </header>
+    <nav class="project-tabs">
+      <button class="project-tab active-tab" data-tab="todo" data-i18n="tab.todo">Por hacer</button>
+      <button class="project-tab" data-tab="wip" data-i18n="tab.wip">En proceso</button>
+      <button class="project-tab" data-tab="redo" data-i18n="tab.redo">Volviendo</button>
+    </nav>
+    <section class="tab-panel active" id="tab-todo"></section>
+    <section class="tab-panel" id="tab-wip" style="display: none;"></section>
+    <section class="tab-panel" id="tab-redo" style="display: none;"></section>
+  </main>
+
+  <!-- VISTA 3: MIS HILOS -->
+  <main class="view-panel" id="viewMaterials">
+    <header class="section-header">
+      <h2 data-i18n="view.materials">Mis Hilos</h2>
+      <button class="btn-primary" id="btnAddThread">+ <span data-i18n="btn.add">Agregar</span></button>
+    </header>
+    <section class="materials-list" id="materialsList"></section>
+  </main>
+
+  <!-- VISTA 4: CALCULADORA -->
+  <main class="view-panel" id="viewCalculator">
+    <header class="section-header">
+      <h2 data-i18n="calc.tabTitle">Calculadora</h2>
+    </header>
+    <section class="calc-card">
+      <h3 class="calc-card-title" data-i18n="calc.title">Cierre de Proyecto</h3>
+      
+      <div class="calc-group">
+        <label data-i18n="calc.yarnSmart">🧵 Madeja: Precio ÷ Gramos totales</label>
+        <div class="calc-row">
+          <input type="number" id="calcYarnPrice" placeholder="Precio $" step="0.1" />
+          <input type="number" id="calcYarnTotalG" placeholder="Gramos totales (ej 100)" />
+        </div>
+      </div>
+
+      <div class="calc-group">
+        <label data-i18n="calc.yarnUsed">⚖️ Gramos usados en el tejido</label>
+        <div class="calc-row">
+          <input type="number" id="calcYarnUsedG" placeholder="Gramos usados (ej 35)" />
+          <span class="calc-badge-cost" id="calcYarnCostResult">$0.00 en hilo</span>
+        </div>
+      </div>
+
+      <div class="calc-group">
+        <label data-i18n="calc.labor">⏱ Horas × tarifa/hr</label>
+        <div class="calc-row">
+          <input type="number" id="calcHours" placeholder="Horas" step="0.1" />
+          <input type="number" id="calcRate" placeholder="$/hr" step="0.1" />
+        </div>
+      </div>
+
+      <div class="calc-group">
+        <label data-i18n="calc.extras">📦 Materiales extras (ojitos, relleno, argolla)</label>
+        <input type="number" id="calcExtras" placeholder="Costo extras $" step="0.1" />
+      </div>
+
+      <div class="calc-group">
+        <label data-i18n="calc.price">🏷️ Precio final de venta</label>
+        <input type="number" id="calcPrice" placeholder="Precio al cliente $" step="0.1" />
+      </div>
+
+      <div class="calc-summary" id="calcResult">
+        <div class="summary-line">
+          <span data-i18n="calc.total">Costo total:</span>
+          <strong id="calcTotal">$0.00</strong>
+        </div>
+        <div class="summary-line">
+          <span data-i18n="calc.profit">Ganancia neta:</span>
+          <strong id="calcProfit">$0.00</strong>
+        </div>
+      </div>
+
+      <div class="calc-buttons">
+        <button class="btn-primary full-width" id="btnCalc" data-i18n="btn.calculate">Calcular</button>
+        <button class="btn-whatsapp full-width" id="btnCopyQuote" style="display: none;" data-i18n="btn.copyQuote">📲 WhatsApp</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- VISTA 5: GLOSARIO -->
+  <main class="view-panel" id="viewGlossary">
+    <header class="section-header">
+      <h2 data-i18n="view.glossary">Glosario</h2>
+    </header>
+    <div class="glossary-search-wrapper">
+      <input type="text" class="search-input" id="glossarySearch" placeholder="🔍 Buscar punto o abreviatura..." />
+    </div>
+    <section class="glossary-grid" id="glossaryList"></section>
+  </main>
+
+  <!-- BARRA DE NAVEGACIÓN INFERIOR -->
+  <nav class="bottom-nav">
+    <button class="nav-item active-nav" data-view="viewWorkstation">
+      <span class="nav-icon">🖥️</span>
+      <span class="nav-text" data-i18n="nav.work">Trabajo</span>
+    </button>
+    <button class="nav-item" data-view="viewProjects">
+      <span class="nav-icon">📁</span>
+      <span class="nav-text" data-i18n="nav.projects">Proyectos</span>
+    </button>
+    <button class="nav-item" data-view="viewMaterials">
+      <span class="nav-icon">🧶</span>
+      <span class="nav-text" data-i18n="nav.yarns">Hilos</span>
+    </button>
+    <button class="nav-item" data-view="viewCalculator">
+      <span class="nav-icon">🔢</span>
+      <span class="nav-text" data-i18n="nav.calc">Calculadora</span>
+    </button>
+    <button class="nav-item" data-view="viewGlossary">
+      <span class="nav-icon">📖</span>
+      <span class="nav-text" data-i18n="nav.glossary">Glosario</span>
+    </button>
   </nav>
 
-</div>
-
-<div class="modal-overlay" id="modalNewThread" role="dialog">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div><h3 class="modal-title" data-i18n="modal.threadTitle">🧶 Agregar Nuevo Hilo</h3>
-    <div class="modal-form">
-      <input type="text" class="modal-input" id="thName" placeholder="Nombre (ej. Rosa Pastel)..." />
-      <div class="np-row"><input type="text" class="modal-input" id="thType" placeholder="Tipo (Algodón)" /><input type="number" class="modal-input" id="thGrams" placeholder="Gramos (100)" /></div>
-      <input type="color" class="modal-input" id="thColor" value="#f4a8b8" style="height: 44px; padding: 4px; cursor: pointer;" title="Color del hilo" />
-    </div>
-    <div class="modal-actions"><button class="modal-btn modal-btn-cancel" id="btnThCancel" data-i18n="btn.cancel">Cancelar</button><button class="modal-btn modal-btn-confirm" id="btnThSave" data-i18n="btn.saveThread">Guardar</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalNewProject" role="dialog">
-  <div class="modal-sheet modal-tall">
-    <div class="modal-handle"></div><h3 class="modal-title" data-i18n="modal.projTitle">🌟 Proyecto</h3>
-    <div class="modal-form">
-      <div class="photo-upload-area">
-        <input type="file" id="npPhotoUpload" accept="image/*" style="display:none">
-        <button type="button" class="np-format-btn" onclick="document.getElementById('npPhotoUpload').click()">📁 Subir imagen</button>
-        <img id="npPhotoPreview" class="photo-preview" style="display:none;" />
+  <!-- MODAL: AGREGAR TUTORIAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-card">
+      <h3 data-i18n="modal.videoTitle">🎬 Agregar Tutorial</h3>
+      <input type="text" class="text-input" id="videoUrlInput" placeholder="Pega el enlace de YouTube o redes sociales..." />
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnModalCancel" data-i18n="btn.cancel">Cancelar</button>
+        <button class="btn-primary" id="btnModalConfirm" data-i18n="btn.load">Cargar</button>
       </div>
-      <input type="hidden" id="npId" value="" />
-      <input type="text" class="modal-input" id="npName" placeholder="Nombre del proyecto" />
-      <div class="np-row"><select class="modal-select" id="npLevel"><option value="">Nivel...</option><option>Principiante</option><option>Intermedio</option><option>Avanzado</option></select><select class="modal-select" id="npStatus"><option value="todo">Por hacer</option><option value="wip">En proceso</option><option value="redo">Volviendo</option></select></div>
-      <div class="np-row"><input type="text" class="modal-input" id="npTags" placeholder="Etiquetas..." /><input type="text" class="modal-input" id="npHook" placeholder="Aguja (ej. 4.0mm)" /></div>
-      <input type="url" class="modal-input" id="npVideo" placeholder="🔗 Link del video tutorial (YouTube, TikTok...)" />
-      <div class="np-textarea-header"><span class="np-textarea-label" data-i18n="modal.pastePattern">📋 Patrón</span><button class="np-format-btn" id="btnFormatPattern" type="button" data-i18n="btn.format">Formatear</button></div>
-      <textarea class="modal-textarea" id="npPattern" placeholder="Vuelta 1: am. 6 pb en am. (6 pb)&#10;..."></textarea>
     </div>
-    <div class="modal-actions"><button class="modal-btn modal-btn-cancel" id="btnNpCancel" data-i18n="btn.cancel">Cancelar</button><button class="modal-btn modal-btn-confirm" id="btnNpSave" data-i18n="btn.saveProj">Guardar</button></div>
   </div>
-</div>
 
-<div class="modal-overlay" id="modalOverlay" role="dialog"><div class="modal-sheet"><div class="modal-handle"></div><h3 class="modal-title" data-i18n="modal.videoTitle">🎬 Tutorial</h3><input type="url" class="modal-input" id="videoUrlInput" placeholder="https://..." /><div class="modal-actions"><button class="modal-btn modal-btn-cancel" id="btnModalCancel">Cancelar</button><button class="modal-btn modal-btn-confirm" id="btnModalConfirm">Cargar</button></div></div></div>
+  <!-- MODAL: NUEVO / EDITAR PROYECTO -->
+  <div class="modal-overlay" id="modalNewProject">
+    <div class="modal-card modal-large">
+      <h3 data-i18n="modal.projTitle">🌟 Proyecto</h3>
+      <input type="hidden" id="npId" />
+      
+      <div class="form-group-center">
+        <img id="npPhotoPreview" class="photo-preview" style="display:none;" />
+        <label class="btn-file-upload">
+          📷 <span data-i18n="btn.photo">Subir imagen</span>
+          <input type="file" id="npPhotoUpload" accept="image/*" style="display:none;" />
+        </label>
+      </div>
 
-<div class="toast" id="toast" role="alert" aria-live="polite"></div>
-<script src="app.js"></script>
+      <div class="form-group">
+        <input type="text" id="npName" class="text-input" placeholder="Nombre del proyecto..." />
+      </div>
+
+      <div class="form-row">
+        <select id="npLevel" class="text-input">
+          <option value="" disabled selected data-i18n="opt.level">Nivel...</option>
+          <option value="Principiante">Principiante</option>
+          <option value="Intermedio">Intermedio</option>
+          <option value="Avanzado">Avanzado</option>
+        </select>
+        <select id="npStatus" class="text-input">
+          <option value="todo" data-i18n="tab.todo">Por hacer</option>
+          <option value="wip" data-i18n="tab.wip">En proceso</option>
+          <option value="redo" data-i18n="tab.redo">Volviendo</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <input type="text" id="npTags" class="text-input" placeholder="Etiquetas (separadas por coma)..." />
+        <input type="text" id="npHook" class="text-input" placeholder="Aguja (ej 2.5mm)..." />
+      </div>
+
+      <div class="form-group">
+        <input type="text" id="npVideo" class="text-input" placeholder="Enlace de video / tutorial..." />
+      </div>
+
+      <!-- SELECTOR DE HILOS DISPONIBLES DE TU INVENTARIO -->
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-sub); display: block; margin-bottom: 6px;">
+          🧶 Hilos para este proyecto (de tu inventario):
+        </label>
+        <div id="npThreadsPicker" class="threads-picker-box" style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 120px; overflow-y: auto; padding: 8px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px;"></div>
+      </div>
+
+      <div class="form-group">
+        <div class="form-label-row">
+          <label data-i18n="modal.pastePattern">📋 Patrón</label>
+          <button type="button" class="btn-action-xs" id="btnFormatPattern" data-i18n="btn.format">Formatear</button>
+        </div>
+        <textarea id="npPattern" class="text-area" rows="6" placeholder="[cabeza]&#10;R1: 6pb en am&#10;R2: 6 aum (12)&#10;&#10;[alitas]&#10;R1: 4pb en am"></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnNpCancel" data-i18n="btn.cancel">Cancelar</button>
+        <button class="btn-primary" id="btnNpSave" data-i18n="btn.saveProj">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: AGREGAR HILO -->
+  <div class="modal-overlay" id="modalNewThread">
+    <div class="modal-card">
+      <h3 data-i18n="modal.threadTitle">🧶 Agregar Nuevo Hilo</h3>
+      <div class="form-group">
+        <input type="text" id="thName" class="text-input" placeholder="Nombre (ej Rosa Bebé)..." />
+      </div>
+      <div class="form-row">
+        <input type="text" id="thType" class="text-input" placeholder="Tipo (ej Algodón 4 hebras)..." />
+        <input type="number" id="thGrams" class="text-input" placeholder="Gramos (ej 100)..." />
+      </div>
+      <div class="form-group">
+        <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-sub);">Color referencial:</label>
+        <input type="color" id="thColor" value="#f4a8b8" style="width: 100%; height: 42px; border: none; border-radius: 8px; cursor: pointer; margin-top: 4px;" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnThCancel" data-i18n="btn.cancel">Cancelar</button>
+        <button class="btn-primary" id="btnThSave" data-i18n="btn.saveThread">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICACIÓN -->
+  <div class="toast" id="toast"></div>
+
+  <script src="./app.js"></script>
 </body>
 </html>
