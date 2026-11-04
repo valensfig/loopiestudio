@@ -1,5 +1,5 @@
 /* ================================================================
-   LOOPIESTUDIO — app.js v5.1 (Sincronización al Iniciar + Persistencia)
+   LOOPIESTUDIO — app.js v5.5 (Conteo por Partes + Desduplicación)
    ================================================================ */
 'use strict';
 
@@ -9,7 +9,11 @@ const TRANSLATION_MAP = { '\\bam\\b': 'mr', '\\bpb\\b': 'sc', '\\bpa\\b': 'dc', 
 
 let isTranslated = false;
 let originalPatternHTML = '';
-function parseMarkdown(text) { if (!text) return text; return text.replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>').replace(/(?<!\*)\*(?!\*)([^*\n]+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>'); }
+
+function parseMarkdown(text) { 
+  if (!text) return text; 
+  return text.replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>').replace(/(?<!\*)\*(?!\*)([^*\n]+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>'); 
+}
 
 function compressImage(file, maxWidth = 600, quality = 0.7) {
   return new Promise((resolve) => {
@@ -49,8 +53,8 @@ async function fetchConTimeout(resource, options = {}) {
 }
 
 const I18N = {
-  es: { 'nav.work': 'Trabajo', 'nav.projects': 'Proyectos', 'nav.yarns': 'Hilos', 'nav.calc': 'Calculadora', 'nav.glossary': 'Glosario', 'view.projects': 'Proyectos', 'view.materials': 'Mis Hilos', 'view.glossary': 'Glosario', 'lang.es': 'ES', 'lang.en': 'EN', 'palette.label': '✨ Paleta sugerida', 'palette.btn': 'Nueva', 'panel.tutorial': 'Tutorial', 'panel.pattern': 'Patrón', 'btn.addTutorial': 'Agregar tutorial', 'video.hint': 'El video no se puede embeber aquí', 'btn.openApp': 'Abrir video en la App', 'btn.changeLink': 'Cambiar enlace', 'pattern.meta': 'Principiante · DK · Aguja 4.0mm', 'phase.materials': 'Detalles', 'mat.tools': 'Aguja recomendada: X', 'notes.title': '📝 Notas', 'notes.desc': 'Mantén la tensión uniforme.', 'status.wip': 'En progreso', 'counter.current': 'VUELTA ACTUAL', 'counter.stitches': 'PUNTOS', 'counter.note': '📝 Nota para vuelta', 'btn.new': 'Nuevo', 'tab.todo': 'Por hacer', 'tab.wip': 'En proceso', 'tab.redo': 'Volviendo', 'proj1.title': 'Guantes de Invierno', 'proj1.meta': 'Avanzado · Verde Menta', 'tag.winter': 'Invierno', 'tag.gift': 'Regalo', 'calc.tabTitle': 'Calculadora', 'calc.title': 'Cierre de Proyecto', 'calc.yarnSmart': '🧵 Precio de madeja ÷ Gramos totales', 'calc.yarnUsed': '⚖️ Gramos usados en tu tejido', 'calc.labor': '⏱ Horas × tarifa/hr', 'calc.extras': '📦 Materiales extras', 'calc.price': '🏷️ Precio final de venta', 'calc.total': 'Costo total:', 'calc.profit': 'Ganancia neta:', 'btn.calculate': 'Calcular', 'btn.copyQuote': '📲 WhatsApp', 'btn.add': 'Agregar', 'mat1.name': 'Hilo Rosa Durazno', 'mat1.meta': 'Algodón DK · 200g', 'glossary.search': '🔍 Buscar punto o abreviatura...', 'toast.lang': '🇪🇸 Idioma cambiado a español', 'modal.videoTitle': '🎬 Agregar Tutorial', 'btn.cancel': 'Cancelar', 'btn.load': 'Cargar', 'modal.projTitle': '🌟 Proyecto', 'opt.level': 'Nivel...', 'modal.pastePattern': '📋 Patrón', 'btn.format': 'Formatear', 'btn.saveProj': 'Guardar', 'btn.photo': '📷 Foto', 'modal.threadTitle': '🧶 Agregar Nuevo Hilo', 'btn.saveThread': 'Guardar' },
-  en: { 'nav.work': 'Workspace', 'nav.projects': 'Projects', 'nav.yarns': 'Yarns', 'nav.calc': 'Calculator', 'nav.glossary': 'Glossary', 'view.projects': 'Projects', 'view.materials': 'My Yarns', 'view.glossary': 'Glossary', 'lang.es': 'ES', 'lang.en': 'EN', 'palette.label': '✨ Suggested Palette', 'palette.btn': 'Refresh', 'panel.tutorial': 'Tutorial', 'panel.pattern': 'Pattern', 'btn.addTutorial': 'Add tutorial', 'video.hint': 'Video cannot be embedded here', 'btn.openApp': 'Open video in App', 'btn.changeLink': 'Change link', 'pattern.meta': 'Beginner · DK · 4.0mm Hook', 'phase.materials': 'Details', 'mat.tools': 'Recommended hook: X', 'notes.title': '📝 Notes', 'notes.desc': 'Keep your tension even.', 'status.wip': 'In progress', 'counter.current': 'CURRENT ROUND', 'counter.stitches': 'STITCHES', 'counter.note': '📝 Note for round', 'btn.new': 'New', 'tab.todo': 'To do', 'tab.wip': 'In progress', 'tab.redo': 'Redo', 'proj1.title': 'Winter Gloves', 'proj1.meta': 'Advanced · Mint Green', 'tag.winter': 'Winter', 'tag.gift': 'Gift', 'calc.tabTitle': 'Calculator', 'calc.title': 'Project Wrap-up', 'calc.yarnSmart': '🧵 Skein price ÷ Total grams', 'calc.yarnUsed': '⚖️ Grams used in project', 'calc.labor': '⏱ Hours × rate/hr', 'calc.extras': '📦 Extra materials', 'calc.price': '🏷️ Final sale price', 'calc.total': 'Total cost:', 'calc.profit': 'Net profit:', 'btn.calculate': 'Calculate', 'btn.copyQuote': '📲 WhatsApp', 'btn.add': 'Add', 'mat1.name': 'Peach Pink Yarn', 'mat1.meta': 'Cotton DK · 200g', 'glossary.search': '🔍 Search stitch or abbreviation...', 'toast.lang': '🇺🇸 Language changed to English', 'modal.videoTitle': '🎬 Add Tutorial', 'btn.cancel': 'Cancel', 'btn.load': 'Load', 'modal.projTitle': '🌟 Project', 'opt.level': 'Level...', 'modal.pastePattern': '📋 Pattern', 'btn.format': 'Format', 'btn.saveProj': 'Save', 'btn.photo': '📷 Photo', 'modal.threadTitle': '🧶 Add New Yarn', 'btn.saveThread': 'Save' }
+  es: { 'nav.work': 'Trabajo', 'nav.projects': 'Proyectos', 'nav.yarns': 'Hilos', 'nav.calc': 'Calculadora', 'nav.glossary': 'Glosario', 'view.projects': 'Proyectos', 'view.materials': 'Mis Hilos', 'view.glossary': 'Glosario', 'lang.es': 'ES', 'lang.en': 'EN', 'palette.label': '✨ Paleta sugerida', 'palette.btn': 'Nueva', 'panel.tutorial': 'Tutorial', 'panel.pattern': 'Patrón', 'btn.addTutorial': 'Agregar tutorial', 'video.hint': 'El video no se puede embeber aquí', 'btn.openApp': 'Abrir video en la App', 'btn.changeLink': 'Cambiar enlace', 'pattern.meta': 'Principiante · DK · Aguja 4.0mm', 'phase.materials': 'Detalles', 'mat.tools': 'Aguja recomendada: X', 'notes.title': '📝 Notas', 'notes.desc': 'Mantén la tensión uniforme.', 'status.wip': 'En progreso', 'counter.current': 'VUELTA ACTUAL', 'counter.stitches': 'PUNTOS', 'counter.note': '📝 Nota para vuelta', 'btn.new': 'Nuevo', 'tab.todo': 'Por hacer', 'tab.wip': 'En proceso', 'tab.redo': 'Volviendo', 'calc.tabTitle': 'Calculadora', 'calc.title': 'Cierre de Proyecto', 'calc.yarnSmart': '🧵 Precio de madeja ÷ Gramos totales', 'calc.yarnUsed': '⚖️ Gramos usados en tu tejido', 'calc.labor': '⏱ Horas × tarifa/hr', 'calc.extras': '📦 Materiales extras', 'calc.price': '🏷️ Precio final de venta', 'calc.total': 'Costo total:', 'calc.profit': 'Ganancia neta:', 'btn.calculate': 'Calcular', 'btn.copyQuote': '📲 WhatsApp', 'btn.add': 'Agregar', 'glossary.search': '🔍 Buscar punto o abreviatura...', 'toast.lang': '🇪🇸 Idioma cambiado a español', 'modal.videoTitle': '🎬 Agregar Tutorial', 'btn.cancel': 'Cancelar', 'btn.load': 'Cargar', 'modal.projTitle': '🌟 Proyecto', 'opt.level': 'Nivel...', 'modal.pastePattern': '📋 Patrón', 'btn.format': 'Formatear', 'btn.saveProj': 'Guardar', 'btn.photo': '📷 Foto', 'modal.threadTitle': '🧶 Agregar Nuevo Hilo', 'btn.saveThread': 'Guardar' },
+  en: { 'nav.work': 'Workspace', 'nav.projects': 'Projects', 'nav.yarns': 'Yarns', 'nav.calc': 'Calculator', 'nav.glossary': 'Glossary', 'view.projects': 'Projects', 'view.materials': 'My Yarns', 'view.glossary': 'Glossary', 'lang.es': 'ES', 'lang.en': 'EN', 'palette.label': '✨ Suggested Palette', 'palette.btn': 'Refresh', 'panel.tutorial': 'Tutorial', 'panel.pattern': 'Pattern', 'btn.addTutorial': 'Add tutorial', 'video.hint': 'Video cannot be embedded here', 'btn.openApp': 'Open video in App', 'btn.changeLink': 'Change link', 'pattern.meta': 'Beginner · DK · 4.0mm Hook', 'phase.materials': 'Details', 'mat.tools': 'Recommended hook: X', 'notes.title': '📝 Notes', 'notes.desc': 'Keep your tension even.', 'status.wip': 'In progress', 'counter.current': 'CURRENT ROUND', 'counter.stitches': 'STITCHES', 'counter.note': '📝 Note for round', 'btn.new': 'New', 'tab.todo': 'To do', 'tab.wip': 'In progress', 'tab.redo': 'Redo', 'calc.tabTitle': 'Calculator', 'calc.title': 'Project Wrap-up', 'calc.yarnSmart': '🧵 Skein price ÷ Total grams', 'calc.yarnUsed': '⚖️ Grams used in project', 'calc.labor': '⏱ Hours × rate/hr', 'calc.extras': '📦 Extra materials', 'calc.price': '🏷️ Final sale price', 'calc.total': 'Total cost:', 'calc.profit': 'Net profit:', 'btn.calculate': 'Calculate', 'btn.copyQuote': '📲 WhatsApp', 'btn.add': 'Add', 'glossary.search': '🔍 Search stitch or abbreviation...', 'toast.lang': '🇺🇸 Language changed to English', 'modal.videoTitle': '🎬 Add Tutorial', 'btn.cancel': 'Cancel', 'btn.load': 'Load', 'modal.projTitle': '🌟 Project', 'opt.level': 'Level...', 'modal.pastePattern': '📋 Pattern', 'btn.format': 'Format', 'btn.saveProj': 'Save', 'btn.photo': '📷 Photo', 'modal.threadTitle': '🧶 Add New Yarn', 'btn.saveThread': 'Save' }
 };
 
 function t(key) { return I18N[state.lang]?.[key] ?? I18N.es[key] ?? key; }
@@ -69,7 +73,7 @@ let currentPaletteIdx = 0;
 let localProjects = []; 
 
 const state = {
-  currentView: 'viewWorkstation', currentRound: 1, totalRounds: 7, stitchCount: 0,
+  currentView: 'viewWorkstation', currentRound: 1, totalRounds: 1, stitchCount: 0,
   videoLoaded: false, quickNotes: {}, isDarkMode: false, paletteOpen: false, lang: 'es',
   timerSeconds: 0, isTimerRunning: false, timerInterval: null
 };
@@ -134,34 +138,134 @@ function loadVideo(url) {
 }
 dom.btnAddVideo.addEventListener('click', openVideoModal); dom.btnChangeVideo.addEventListener('click', openVideoModal); dom.btnChangeExternal.addEventListener('click', openVideoModal); dom.btnModalCancel.addEventListener('click', closeVideoModal); dom.btnModalConfirm.addEventListener('click', () => { if (dom.videoUrlInput.value) loadVideo(dom.videoUrlInput.value); }); dom.modalOverlay.addEventListener('click', e => { if (e.target === dom.modalOverlay) closeVideoModal(); });
 
-function bindPhaseToggles() { document.querySelectorAll('.phase-toggle').forEach(toggle => { toggle.addEventListener('click', () => { const body = $(toggle.dataset.target); const isCollapsed = body.classList.contains('collapsed'); body.classList.toggle('collapsed', !isCollapsed); toggle.classList.toggle('collapsed', !isCollapsed); toggle.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false'); }); }); }
+function bindPhaseToggles() { 
+  document.querySelectorAll('.phase-toggle').forEach(toggle => { 
+    toggle.addEventListener('click', () => { 
+      const body = $(toggle.dataset.target); 
+      const isCollapsed = body.classList.contains('collapsed'); 
+      body.classList.toggle('collapsed', !isCollapsed); 
+      toggle.classList.toggle('collapsed', !isCollapsed); 
+      toggle.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false'); 
+    }); 
+  }); 
+}
 bindPhaseToggles();
 
 function updateCounterUI() {
-  const { currentRound, totalRounds } = state; dom.counterNumber.textContent = currentRound; dom.counterProgressFill.style.width = `${(currentRound / totalRounds) * 100}%`; dom.patternProgressBadge.textContent = `V. ${currentRound}`; highlightActiveRound(currentRound);
+  const { currentRound, totalRounds } = state; 
+  dom.counterNumber.textContent = currentRound; 
+  dom.counterTotal.textContent = `de ${totalRounds}`;
+  dom.counterProgressFill.style.width = `${Math.min(100, (currentRound / Math.max(1, totalRounds)) * 100)}%`; 
+  dom.patternProgressBadge.textContent = `V. ${currentRound}`; 
+  highlightActiveRound(currentRound);
+  
   dom.counterNumber.classList.remove('bump'); void dom.counterNumber.offsetWidth; dom.counterNumber.classList.add('bump');
-  dom.btnMinus.style.opacity = currentRound <= 1 ? '0.4' : '1'; dom.btnPlus.style.opacity = currentRound >= totalRounds ? '0.4' : '1'; dom.quickNoteInput.value = state.quickNotes[currentRound] || ''; dom.quickNoteInput.placeholder = `${t('counter.note')} ${currentRound}...`;
+  dom.btnMinus.style.opacity = currentRound <= 1 ? '0.4' : '1'; 
+  dom.btnPlus.style.opacity = currentRound >= totalRounds ? '0.4' : '1'; 
+  dom.quickNoteInput.value = state.quickNotes[currentRound] || ''; 
+  dom.quickNoteInput.placeholder = `${t('counter.note')} ${currentRound}...`;
 }
+
 function highlightActiveRound(round) {
   document.querySelectorAll('.pattern-round').forEach(el => {
-    const r = parseInt(el.dataset.round, 10); el.classList.remove('active-round', 'completed-round');
-    if (r === round) { el.classList.add('active-round'); const phase = el.closest('.phase-body'); if (phase && phase.classList.contains('collapsed')) { phase.classList.remove('collapsed'); document.querySelector(`[data-target="${phase.id}"]`).classList.remove('collapsed'); } setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150); } else if (r < round) el.classList.add('completed-round');
+    const r = parseInt(el.dataset.round, 10); 
+    el.classList.remove('active-round', 'completed-round');
+    if (r === round) { 
+      el.classList.add('active-round'); 
+      const phase = el.closest('.phase-body'); 
+      if (phase && phase.classList.contains('collapsed')) { 
+        phase.classList.remove('collapsed'); 
+        document.querySelector(`[data-target="${phase.id}"]`)?.classList.remove('collapsed'); 
+      } 
+      setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150); 
+    } else if (r < round) {
+      el.classList.add('completed-round');
+    }
   });
 }
 
-dom.btnPlus.addEventListener('click', e => { rippleEffect(e, dom.btnPlus); if (state.currentRound < state.totalRounds) { state.quickNotes[state.currentRound] = dom.quickNoteInput.value; state.currentRound++; state.stitchCount = 0; dom.stitchCount.textContent = '0'; updateCounterUI(); saveLocalProgress(); } });
-dom.btnMinus.addEventListener('click', e => { rippleEffect(e, dom.btnMinus); if (state.currentRound > 1) { state.quickNotes[state.currentRound] = dom.quickNoteInput.value; state.currentRound--; state.stitchCount = 0; dom.stitchCount.textContent = '0'; updateCounterUI(); saveLocalProgress(); } });
-dom.btnReset.addEventListener('click', () => { if (confirm('¿Reiniciar el contador?')) { state.currentRound = 1; state.stitchCount = 0; state.quickNotes = {}; dom.stitchCount.textContent = '0'; updateCounterUI(); saveLocalProgress(); } });
+dom.btnPlus.addEventListener('click', e => { 
+  rippleEffect(e, dom.btnPlus); 
+  if (state.currentRound < state.totalRounds) { 
+    state.quickNotes[state.currentRound] = dom.quickNoteInput.value; 
+    state.currentRound++; 
+    state.stitchCount = 0; 
+    dom.stitchCount.textContent = '0'; 
+    updateCounterUI(); 
+    saveLocalProgress(); 
+  } 
+});
+
+dom.btnMinus.addEventListener('click', e => { 
+  rippleEffect(e, dom.btnMinus); 
+  if (state.currentRound > 1) { 
+    state.quickNotes[state.currentRound] = dom.quickNoteInput.value; 
+    state.currentRound--; 
+    state.stitchCount = 0; 
+    dom.stitchCount.textContent = '0'; 
+    updateCounterUI(); 
+    saveLocalProgress(); 
+  } 
+});
+
+dom.btnReset.addEventListener('click', () => { 
+  if (confirm('¿Reiniciar el contador?')) { 
+    state.currentRound = 1; 
+    state.stitchCount = 0; 
+    state.quickNotes = {}; 
+    dom.stitchCount.textContent = '0'; 
+    updateCounterUI(); 
+    saveLocalProgress(); 
+  } 
+});
+
 dom.btnStitchPlus.addEventListener('click', () => { state.stitchCount++; dom.stitchCount.textContent = state.stitchCount; pulseElement(dom.stitchCount); saveLocalProgress(); });
 dom.btnStitchMinus.addEventListener('click', () => { if (state.stitchCount > 0) { state.stitchCount--; dom.stitchCount.textContent = state.stitchCount; pulseElement(dom.stitchCount); saveLocalProgress(); } });
 dom.quickNoteInput.addEventListener('input', () => { state.quickNotes[state.currentRound] = dom.quickNoteInput.value; saveLocalProgress(); });
 
 function formatTimer(sec) { const h = Math.floor(sec / 3600).toString().padStart(2, '0'), m = Math.floor((sec % 3600) / 60).toString().padStart(2, '0'), s = (sec % 60).toString().padStart(2, '0'); return `${h}:${m}:${s}`; }
-dom.btnTimerToggle.addEventListener('click', () => { state.isTimerRunning = !state.isTimerRunning; if (state.isTimerRunning) { dom.btnTimerToggle.textContent = '⏸️'; state.timerInterval = setInterval(() => { state.timerSeconds++; dom.timerDisplay.textContent = formatTimer(state.timerSeconds); saveLocalProgress(); if (dom.calcHours) { dom.calcHours.value = (state.timerSeconds / 3600).toFixed(2); dom.btnCalc.click(); } }, 1000); } else { dom.btnTimerToggle.textContent = '▶️'; clearInterval(state.timerInterval); } });
+dom.btnTimerToggle.addEventListener('click', () => { 
+  state.isTimerRunning = !state.isTimerRunning; 
+  if (state.isTimerRunning) { 
+    dom.btnTimerToggle.textContent = '⏸️'; 
+    state.timerInterval = setInterval(() => { 
+      state.timerSeconds++; 
+      dom.timerDisplay.textContent = formatTimer(state.timerSeconds); 
+      saveLocalProgress(); 
+      if (dom.calcHours) { 
+        dom.calcHours.value = (state.timerSeconds / 3600).toFixed(2); 
+        dom.btnCalc.click(); 
+      } 
+    }, 1000); 
+  } else { 
+    dom.btnTimerToggle.textContent = '▶️'; 
+    clearInterval(state.timerInterval); 
+  } 
+});
 
 dom.btnTranslate.addEventListener('click', () => {
   const rounds = document.querySelectorAll('.round-instructions'); const isEN = state.lang === 'en';
-  if (!isTranslated) { originalPatternHTML = dom.patternContent.innerHTML; rounds.forEach(el => { let html = el.innerHTML; for (const [pattern, rep] of Object.entries(TRANSLATION_MAP)) { html = html.replace(new RegExp(pattern, 'gi'), m => m[0] === m[0].toUpperCase() ? rep.charAt(0).toUpperCase() + rep.slice(1) : rep); } el.innerHTML = html; }); document.querySelectorAll('.round-number').forEach(el => el.textContent = el.textContent.replace(/Vuelta|Round/gi, isEN ? 'Round' : 'Vuelta')); document.querySelectorAll('.round-stitches').forEach(el => el.textContent = el.textContent.replace(/\bpb\b/gi, 'sc')); dom.btnTranslate.style.background = 'rgba(255,216,64,0.40)'; isTranslated = true; showToast('🌐 Patrón traducido'); } else { dom.patternContent.innerHTML = originalPatternHTML; bindPhaseToggles(); dom.btnTranslate.style.background = ''; isTranslated = false; showToast('🔤 Patrón restaurado'); highlightActiveRound(state.currentRound); }
+  if (!isTranslated) { 
+    originalPatternHTML = dom.patternContent.innerHTML; 
+    rounds.forEach(el => { 
+      let html = el.innerHTML; 
+      for (const [pattern, rep] of Object.entries(TRANSLATION_MAP)) { 
+        html = html.replace(new RegExp(pattern, 'gi'), m => m[0] === m[0].toUpperCase() ? rep.charAt(0).toUpperCase() + rep.slice(1) : rep); 
+      } 
+      el.innerHTML = html; 
+    }); 
+    document.querySelectorAll('.round-stitches').forEach(el => el.textContent = el.textContent.replace(/\bpb\b/gi, 'sc')); 
+    dom.btnTranslate.style.background = 'rgba(255,216,64,0.40)'; 
+    isTranslated = true; 
+    showToast('🌐 Patrón traducido'); 
+  } else { 
+    dom.patternContent.innerHTML = originalPatternHTML; 
+    bindPhaseToggles(); 
+    dom.btnTranslate.style.background = ''; 
+    isTranslated = false; 
+    showToast('🔤 Patrón restaurado'); 
+    highlightActiveRound(state.currentRound); 
+  }
 });
 
 dom.btnCalc.addEventListener('click', () => {
@@ -181,7 +285,7 @@ dom.glossarySearch.addEventListener('input', () => { const q = dom.glossarySearc
 
 dom.projectTabs.forEach(tab => tab.addEventListener('click', () => { dom.projectTabs.forEach(t => t.classList.toggle('active-tab', t === tab)); document.querySelectorAll('.tab-panel').forEach(p => p.style.display = p.id === `tab-${tab.dataset.tab}` ? 'grid' : 'none'); }));
 
-// FUNCIÓN DE SINCRONIZACIÓN
+// SINCRONIZACIÓN AUTOMÁTICA
 async function sincronizarPendientes() {
   let sincronizados = 0;
   for (let i = 0; i < localStorage.length; i++) {
@@ -196,18 +300,17 @@ async function sincronizarPendientes() {
           i--; 
         } 
       } catch (e) {
-        break; // Si falla uno, Apache sigue apagado o no hay red
+        break; 
       }
     }
   }
   if (sincronizados > 0) { 
-    showToast(`✅ ${sincronizados} proyecto(s) sincronizados con MySQL`); 
+    showToast(`✅ Proyectos sincronizados con MySQL`); 
   }
 }
 
-// Cargar proyectos combinando BD y locales
 async function fetchProjectsFromDB() {
-  await sincronizarPendientes(); // Subir los pendientes primero
+  await sincronizarPendientes();
 
   let serverProjects = [];
   try {
@@ -227,33 +330,29 @@ async function fetchProjectsFromDB() {
     }
   }
 
-  // Buscar si todavía queda alguno guardado offline que no haya subido
+  // Leer proyectos de la cola offline
   const pendingProjects = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (key && key.startsWith('offline_proj_')) {
       try {
-        const item = JSON.parse(localStorage.getItem(key));
-        pendingProjects.push(item);
+        pendingProjects.push(JSON.parse(localStorage.getItem(key)));
       } catch(e) {}
     }
   }
 
-  // Combinar los pendientes con los del servidor sin duplicar
-  const combined = [...pendingProjects];
-  serverProjects.forEach(sp => {
-    if (!combined.some(cp => cp.nombre === sp.nombre)) {
-      combined.push(sp);
-    }
-  });
+  // Desduplicar por nombre exacto
+  const uniqueMap = new Map();
+  serverProjects.forEach(p => uniqueMap.set(p.nombre, p));
+  pendingProjects.forEach(p => uniqueMap.set(p.nombre, p)); // Las ediciones locales sobrescriben
 
-  localProjects = combined;
+  localProjects = Array.from(uniqueMap.values());
   renderProjectsGrid();
 }
 
 function renderProjectsGrid() {
   dom.tabTodo.innerHTML = ''; dom.tabWip.innerHTML = ''; dom.tabRedo.innerHTML = '';
-  if(localProjects.length === 0) { 
+  if (localProjects.length === 0) { 
     dom.tabTodo.innerHTML = `<div class="empty-state"><span class="empty-icon">📁</span><p>No tienes proyectos aquí.</p></div>`; 
     return; 
   }
@@ -276,9 +375,21 @@ function renderProjectsGrid() {
     
     card.querySelector('.delete-proj-btn').addEventListener('click', async (e) => {
       e.stopPropagation();
-      if(confirm('¿Seguro que quieres eliminar este proyecto?')) {
+      if(confirm(`¿Eliminar "${proj.nombre}"?`)) {
         localProjects.splice(index, 1); 
         localStorage.setItem('loopie_projects_cache', JSON.stringify(localProjects));
+        
+        // Limpiar de pendientes si estaba guardado offline
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('offline_proj_')) {
+            try {
+              const d = JSON.parse(localStorage.getItem(key));
+              if (d.nombre === proj.nombre) localStorage.removeItem(key);
+            } catch(e) {}
+          }
+        }
+        
         renderProjectsGrid();
         try { 
           await fetchConTimeout('api.php', { method: 'POST', body: JSON.stringify({ action: 'delete', nombre: proj.nombre }), timeout: 2000 }); 
@@ -290,37 +401,111 @@ function renderProjectsGrid() {
 
     card.querySelector('.edit-proj-btn').addEventListener('click', (e) => {
       e.stopPropagation();
-      dom.npId.value = proj.id || ''; dom.npName.value = proj.nombre || ''; dom.npLevel.value = proj.nivel || ''; dom.npStatus.value = proj.estado || 'todo'; dom.npTags.value = proj.tags || ''; dom.npHook.value = proj.hook || ''; dom.npVideo.value = proj.video_url || ''; dom.npPattern.value = proj.patron_texto || '';
+      dom.npId.value = proj.id || ''; 
+      dom.npName.value = proj.nombre || ''; 
+      dom.npLevel.value = proj.nivel || ''; 
+      dom.npStatus.value = proj.estado || 'todo'; 
+      dom.npTags.value = proj.tags || ''; 
+      dom.npHook.value = proj.hook || ''; 
+      dom.npVideo.value = proj.video_url || ''; 
+      dom.npPattern.value = proj.patron_texto || '';
       currentProjPhotoBase64 = proj.foto || '';
       if(proj.foto) { dom.npPhotoPreview.src = proj.foto; dom.npPhotoPreview.style.display = 'block'; } else { dom.npPhotoPreview.style.display = 'none'; }
       dom.modalNewProject.classList.add('open');
     });
 
     card.addEventListener('click', () => {
-      dom.wsProjName.textContent = proj.nombre; dom.wsCounterName.textContent = proj.nombre; dom.wsProjMeta.textContent = `${proj.nivel || ''} · Aguja ${proj.hook || 'No definida'}`; dom.wsProjTags.innerHTML = `<li><span>Aguja recomendada: ${proj.hook || 'X'}</span></li>`;
+      dom.wsProjName.textContent = proj.nombre; 
+      dom.wsCounterName.textContent = proj.nombre; 
+      dom.wsProjMeta.textContent = `${proj.nivel || ''} · Aguja ${proj.hook || 'No definida'}`; 
+      dom.wsProjTags.innerHTML = `<li><span>Aguja recomendada: ${proj.hook || 'X'}</span></li>`;
       
       const lines = (proj.patron_texto || '').split('\n').filter(l => l.trim() !== '');
-      let roundsCount = 0; let currentPhase = 'Instrucciones Generales'; let phasesHTML = ''; let currentRoundsHTML = ''; let phaseIdCounter = 1;
-      
+      let globalRoundCounter = 0;
+      let phaseIdCounter = 1;
+      let currentPhaseName = 'Instrucciones Principales';
+      let currentPhaseRoundsHTML = '';
+      let phasesHTML = '';
+      let partRoundNumber = 0;
+
       lines.forEach(line => {
-        const sectionMatch = line.match(/^\[(.*)\]$/);
+        const trimmed = line.trim();
+        const sectionMatch = trimmed.match(/^\[(.*)\]$/);
+        
         if (sectionMatch) {
-            if(currentRoundsHTML) { phasesHTML += `<div class="pattern-phase"><button class="phase-toggle" data-target="phase-${phaseIdCounter}" aria-expanded="true"><span class="phase-label"><span class="phase-ico">🌸</span> <span>${currentPhase}</span></span><svg class="phase-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button><div class="phase-body" id="phase-${phaseIdCounter}"><div class="pattern-rounds">${currentRoundsHTML}</div></div></div>`; phaseIdCounter++; currentRoundsHTML = ''; }
-            currentPhase = sectionMatch[1];
+          // Si cerramos una parte anterior con vueltas acumuladas
+          if (currentPhaseRoundsHTML) {
+            phasesHTML += `
+              <div class="pattern-phase">
+                <button class="phase-toggle" data-target="phase-${phaseIdCounter}" aria-expanded="true">
+                  <span class="phase-label"><span class="phase-ico">🌸</span> <span>${currentPhaseName}</span></span>
+                  <svg class="phase-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <div class="phase-body" id="phase-${phaseIdCounter}"><div class="pattern-rounds">${currentPhaseRoundsHTML}</div></div>
+              </div>`;
+            phaseIdCounter++;
+            currentPhaseRoundsHTML = '';
+          }
+          currentPhaseName = sectionMatch[1].toUpperCase();
+          partRoundNumber = 0; // REINICIO DE VUELTAS A 1 PARA LA NUEVA PARTE
         } else {
-            roundsCount++; currentRoundsHTML += `<div class="pattern-round" data-round="${roundsCount}" id="round-${roundsCount}"><div class="round-header"><span class="round-number">Vuelta ${roundsCount}</span><span class="round-stitches"></span></div><p class="round-instructions">${parseMarkdown(line)}</p></div>`;
+          globalRoundCounter++;
+          partRoundNumber++;
+          
+          // Detectar si el texto original ya venía con R1, R2, V1, etc.
+          const roundLabelMatch = trimmed.match(/^(?:r|round|vuelta|v)\s*(\d+)[\s:.-]*/i);
+          let displayRoundNumber = partRoundNumber;
+          let instructionClean = trimmed;
+
+          if (roundLabelMatch) {
+            displayRoundNumber = roundLabelMatch[1];
+            instructionClean = trimmed.replace(/^(?:r|round|vuelta|v)\s*\d+[\s:.-]*/i, '').trim();
+          }
+
+          currentPhaseRoundsHTML += `
+            <div class="pattern-round" data-round="${globalRoundCounter}" id="round-${globalRoundCounter}">
+              <div class="round-header">
+                <span class="round-number">R${displayRoundNumber}</span>
+                <span class="round-stitches">${currentPhaseName}</span>
+              </div>
+              <p class="round-instructions">${parseMarkdown(instructionClean)}</p>
+            </div>`;
         }
       });
-      if(currentRoundsHTML) { phasesHTML += `<div class="pattern-phase"><button class="phase-toggle" data-target="phase-${phaseIdCounter}" aria-expanded="true"><span class="phase-label"><span class="phase-ico">🌸</span> <span>${currentPhase}</span></span><svg class="phase-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button><div class="phase-body" id="phase-${phaseIdCounter}"><div class="pattern-rounds">${currentRoundsHTML}</div></div></div>`; }
 
-      const materialesHTML = `<div class="pattern-phase"><button class="phase-toggle" data-target="phase-mat" aria-expanded="true"><span class="phase-label"><span class="phase-ico">🧵</span> <span data-i18n="phase.materials">Detalles</span></span><svg class="phase-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button><div class="phase-body" id="phase-mat"><ul class="pattern-list" id="wsProjTags"><li><span data-i18n="mat.tools">Aguja recomendada: ${proj.hook || 'X'}</span></li></ul></div></div>`;
+      if (currentPhaseRoundsHTML) {
+        phasesHTML += `
+          <div class="pattern-phase">
+            <button class="phase-toggle" data-target="phase-${phaseIdCounter}" aria-expanded="true">
+              <span class="phase-label"><span class="phase-ico">🌸</span> <span>${currentPhaseName}</span></span>
+              <svg class="phase-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="phase-body" id="phase-${phaseIdCounter}"><div class="pattern-rounds">${currentPhaseRoundsHTML}</div></div>
+          </div>`;
+      }
+
+      const materialesHTML = `
+        <div class="pattern-phase">
+          <button class="phase-toggle" data-target="phase-mat" aria-expanded="true">
+            <span class="phase-label"><span class="phase-ico">🧵</span> <span data-i18n="phase.materials">Detalles</span></span>
+            <svg class="phase-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="phase-body" id="phase-mat"><ul class="pattern-list" id="wsProjTags"><li><span>Aguja recomendada: ${proj.hook || 'X'}</span></li></ul></div>
+        </div>`;
+
       dom.patternContent.innerHTML = `<div class="pattern-intro"><h3 class="pattern-name" id="wsProjName">${proj.nombre}</h3><p class="pattern-meta" id="wsProjMeta">${proj.nivel || ''} · Aguja ${proj.hook || 'No definida'}</p></div>` + materialesHTML + phasesHTML;
       bindPhaseToggles();
       
       resetVideoPanel();
       if(proj.video_url) { loadVideo(proj.video_url); }
       
-      state.totalRounds = roundsCount; state.currentRound = 1; state.stitchCount = 0; state.timerSeconds = 0; updateCounterUI(); navigateTo('viewWorkstation'); showToast('🧶 Proyecto cargado');
+      state.totalRounds = Math.max(1, globalRoundCounter); 
+      state.currentRound = 1; 
+      state.stitchCount = 0; 
+      state.timerSeconds = 0; 
+      updateCounterUI(); 
+      navigateTo('viewWorkstation'); 
+      showToast('🧶 Proyecto cargado');
     });
 
     if(proj.estado === 'todo') dom.tabTodo.appendChild(card); else if(proj.estado === 'wip') dom.tabWip.appendChild(card); else dom.tabRedo.appendChild(card);
@@ -345,6 +530,7 @@ dom.btnNewProject.addEventListener('click', () => {
 
 dom.btnNpCancel.addEventListener('click', () => dom.modalNewProject.classList.remove('open'));
 
+// GUARDAR / EDITAR DESDUPLICADO
 dom.btnNpSave.addEventListener('click', async () => {
   const data = { 
     id: dom.npId.value, 
@@ -373,7 +559,21 @@ dom.btnNpSave.addEventListener('click', async () => {
     fetchProjectsFromDB(); 
   }
   catch (error) { 
-    // Guardar en la cola offline
+    // Limpiar claves viejas con el mismo nombre para no acumular duplicados en cola offline
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('offline_proj_')) {
+        try {
+          const item = JSON.parse(localStorage.getItem(key));
+          if (item.nombre === data.nombre) {
+            localStorage.removeItem(key);
+            i--;
+          }
+        } catch(e) {}
+      }
+    }
+
+    // Guardar una única versión pendiente actualizada
     localStorage.setItem(`offline_proj_${Date.now()}`, JSON.stringify(data)); 
     
     // Actualizar pantalla de inmediato
@@ -385,11 +585,15 @@ dom.btnNpSave.addEventListener('click', async () => {
     }
     localStorage.setItem('loopie_projects_cache', JSON.stringify(localProjects));
     renderProjectsGrid();
-    showToast('📴 Sin conexión: Guardado local'); 
+    showToast('📴 Guardado localmente (sin duplicar)'); 
   }
 });
 
-dom.btnFormatPattern.addEventListener('click', () => { if (!dom.npPattern.value.trim()) return showToast('⚠️ Patrón vacío'); dom.npPattern.value = dom.npPattern.value.replace(/\r\n/g, '\n').replace(/^\s+|\s+$/gm, l=>l.trim()).replace(/\n{3,}/g, '\n\n').replace(/^(vuelta|round|r)\s*(\d+)/gim, (_,w,n) => `${w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()} ${n}`); showToast('✨ Patrón formateado'); });
+dom.btnFormatPattern.addEventListener('click', () => { 
+  if (!dom.npPattern.value.trim()) return showToast('⚠️ Patrón vacío'); 
+  dom.npPattern.value = dom.npPattern.value.replace(/\r\n/g, '\n').replace(/^\s+|\s+$/gm, l=>l.trim()).replace(/\n{3,}/g, '\n\n').replace(/^(vuelta|round|r)\s*(\d+)/gim, (_,w,n) => `R${n}`); 
+  showToast('✨ Patrón formateado'); 
+});
 
 dom.btnAddThread.addEventListener('click', () => { dom.modalNewThread.classList.add('open'); setTimeout(() => dom.thName.focus(), 320); });
 dom.btnThCancel.addEventListener('click', () => dom.modalNewThread.classList.remove('open'));
@@ -402,7 +606,6 @@ dom.btnThSave.addEventListener('click', () => {
   dom.modalNewThread.classList.remove('open'); dom.thName.value = ''; dom.thType.value = ''; dom.thGrams.value = ''; showToast('🧶 Hilo guardado');
 });
 
-// Evento en caso de reconexión sin recargar
 window.addEventListener('online', async () => {
   await sincronizarPendientes();
   fetchProjectsFromDB();
