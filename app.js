@@ -1,5 +1,5 @@
 /* ================================================================
-   LOOPIESTUDIO — app.js v8.0 (Hilos Vinculados + Offline Total)
+   LOOPIESTUDIO — app.js v8.5 (Hilos Vinculados + Offline Total)
    ================================================================ */
 'use strict';
 
@@ -269,7 +269,7 @@ dom.btnCopyQuote.addEventListener('click', () => { const p = parseFloat(dom.calc
 
 function renderGlossary(items) {
   dom.glossaryList.innerHTML = ''; if (items.length === 0) return dom.glossaryList.innerHTML = `<div class="empty-state">🔍<p>Sin resultados</p></div>`;
-  items.forEach(item => { const card = document.createElement('div'); card.className = 'glossary-card'; card.innerHTML = `<div class="glossary-card-header"><div class="glossary-abbrev"><span class="abbrev-es">${item.es}</span><span class="abbrev-en">${item.en}</span></div><div class="glossary-info"><div class="glossary-term">${item.name}</div><div class="glossary-short">${item.short}</div></div><svg class="glossary-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div><div class="glossary-card-body"><div class="glossary-card-content"><div class="glossary-img"><img src="img/${item.es}.jpg" onerror="this.style.display='none';this.parentNode.textContent='${item.icon}'" /></div><div class="glossary-desc">${item.desc}<br><span class="glossary-tip">${item.tip}</span></div></div></div>`; card.querySelector('.glossary-card-header').addEventListener('click', () => { document.querySelectorAll('.glossary-card.open').forEach(c => c !== card && c.classList.remove('open')); card.classList.toggle('open'); }); dom.glossaryList.appendChild(card); });
+  items.forEach(item => { const card = document.createElement('div'); card.className = 'glossary-card'; card.innerHTML = `<div class="glossary-card-header"><div class="glossary-abbrev"><span class="abbrev-es">${item.es}</span><span class="abbrev-en">${item.en}</span></div><div class="glossary-info"><div class="glossary-term">${item.name}</div><div class="glossary-short">${item.short}</div></div><svg class="glossary-chevron" width="18" height="18" style="width:18px !important; height:18px !important; min-width:18px !important;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div><div class="glossary-card-body"><div class="glossary-card-content"><div class="glossary-img"><img src="img/${item.es}.jpg" onerror="this.style.display='none';this.parentNode.textContent='${item.icon}'" /></div><div class="glossary-desc">${item.desc}<br><span class="glossary-tip">${item.tip}</span></div></div></div>`; card.querySelector('.glossary-card-header').addEventListener('click', () => { document.querySelectorAll('.glossary-card.open').forEach(c => c !== card && c.classList.remove('open')); card.classList.toggle('open'); }); dom.glossaryList.appendChild(card); });
 }
 dom.glossarySearch.addEventListener('input', () => { const q = dom.glossarySearch.value.toLowerCase().trim(); const ds = state.lang === 'en' ? GLOSSARY_EN : GLOSSARY; renderGlossary(q ? ds.filter(i => i.es.includes(q) || i.en.includes(q) || i.name.toLowerCase().includes(q)) : ds); });
 
@@ -379,7 +379,7 @@ function renderProjectsGrid() {
               <div class="pattern-phase">
                 <button class="phase-toggle" data-target="phase-${phaseIdCounter}" aria-expanded="true">
                   <span class="phase-label"><span class="phase-ico">🌸</span> <span>${currentPhaseName}</span></span>
-                  <svg class="phase-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                  <svg class="phase-chevron" width="18" height="18" style="width:18px !important; height:18px !important; min-width:18px !important;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                 </button>
                 <div class="phase-body" id="phase-${phaseIdCounter}"><div class="pattern-rounds">${currentPhaseRoundsHTML}</div></div>
               </div>`;
@@ -417,13 +417,12 @@ function renderProjectsGrid() {
           <div class="pattern-phase">
             <button class="phase-toggle" data-target="phase-${phaseIdCounter}" aria-expanded="true">
               <span class="phase-label"><span class="phase-ico">🌸</span> <span>${currentPhaseName}</span></span>
-              <svg class="phase-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+              <svg class="phase-chevron" width="18" height="18" style="width:18px !important; height:18px !important; min-width:18px !important;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
             <div class="phase-body" id="phase-${phaseIdCounter}"><div class="pattern-rounds">${currentPhaseRoundsHTML}</div></div>
           </div>`;
       }
 
-      // RENDERIZAR DETALLES CON HILOS ASIGNADOS
       let hilosHTML = '';
       if (proj.assignedThreads && proj.assignedThreads.length > 0) {
         proj.assignedThreads.forEach(thId => {
@@ -442,7 +441,7 @@ function renderProjectsGrid() {
         <div class="pattern-phase">
           <button class="phase-toggle" data-target="phase-mat" aria-expanded="true">
             <span class="phase-label"><span class="phase-ico">🧵</span> <span data-i18n="phase.materials">Detalles y Materiales</span></span>
-            <svg class="phase-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            <svg class="phase-chevron" width="18" height="18" style="width:18px !important; height:18px !important; min-width:18px !important;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div class="phase-body" id="phase-mat">
             <ul class="pattern-list" id="wsProjTags">
@@ -471,7 +470,6 @@ function renderProjectsGrid() {
   });
 }
 
-// POBLAR EL SELECTOR DE HILOS DENTRO DEL MODAL
 function populateThreadsPicker(assignedIds = []) {
   if (!dom.npThreadsPicker) return;
   dom.npThreadsPicker.innerHTML = '';
