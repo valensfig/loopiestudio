@@ -1,5 +1,5 @@
 /* ================================================================
-   LOOPIESTUDIO — app.js v8.5 (Hilos Vinculados + Offline Total)
+   LOOPIESTUDIO — app.js v7.0 (Persistencia de Hilos + Proyectos)
    ================================================================ */
 'use strict';
 
@@ -82,7 +82,7 @@ const dom = {
   timerDisplay: $('timerDisplay'), btnTimerToggle: $('btnTimerToggle'),
   projectTabs: document.querySelectorAll('.project-tab'), btnNewProject: $('btnNewProject'),
   calcYarnPrice: $('calcYarnPrice'), calcYarnTotalG: $('calcYarnTotalG'), calcYarnUsedG: $('calcYarnUsedG'), calcYarnCostResult: $('calcYarnCostResult'), calcHours: $('calcHours'), calcRate: $('calcRate'), calcExtras: $('calcExtras'), calcPrice: $('calcPrice'), calcTotal: $('calcTotal'), calcProfit: $('calcProfit'), btnCalc: $('btnCalc'), btnCopyQuote: $('btnCopyQuote'),
-  modalNewProject: $('modalNewProject'), btnNpCancel: $('btnNpCancel'), btnNpSave: $('btnNpSave'), btnFormatPattern: $('btnFormatPattern'), npPattern: $('npPattern'), npPhotoUpload: $('npPhotoUpload'), npPhotoPreview: $('npPhotoPreview'), npId: $('npId'), npName: $('npName'), npLevel: $('npLevel'), npStatus: $('npStatus'), npTags: $('npTags'), npHook: $('npHook'), npVideo: $('npVideo'), npThreadsPicker: $('npThreadsPicker'),
+  modalNewProject: $('modalNewProject'), btnNpCancel: $('btnNpCancel'), btnNpSave: $('btnNpSave'), btnFormatPattern: $('btnFormatPattern'), npPattern: $('npPattern'), npPhotoUpload: $('npPhotoUpload'), npPhotoPreview: $('npPhotoPreview'), npId: $('npId'), npName: $('npName'), npLevel: $('npLevel'), npStatus: $('npStatus'), npTags: $('npTags'), npHook: $('npHook'), npVideo: $('npVideo'),
   modalNewThread: $('modalNewThread'), btnAddThread: $('btnAddThread'), btnThCancel: $('btnThCancel'), btnThSave: $('btnThSave'), thName: $('thName'), thType: $('thType'), thGrams: $('thGrams'), thColor: $('thColor'), materialsList: $('materialsList'),
   glossarySearch: $('glossarySearch'), glossaryList: $('glossaryList'), toast: $('toast'),
   tabTodo: $('tab-todo'), tabWip: $('tab-wip'), tabRedo: $('tab-redo'),
@@ -269,13 +269,13 @@ dom.btnCopyQuote.addEventListener('click', () => { const p = parseFloat(dom.calc
 
 function renderGlossary(items) {
   dom.glossaryList.innerHTML = ''; if (items.length === 0) return dom.glossaryList.innerHTML = `<div class="empty-state">🔍<p>Sin resultados</p></div>`;
-  items.forEach(item => { const card = document.createElement('div'); card.className = 'glossary-card'; card.innerHTML = `<div class="glossary-card-header"><div class="glossary-abbrev"><span class="abbrev-es">${item.es}</span><span class="abbrev-en">${item.en}</span></div><div class="glossary-info"><div class="glossary-term">${item.name}</div><div class="glossary-short">${item.short}</div></div><svg class="glossary-chevron" width="18" height="18" style="width:18px !important; height:18px !important; min-width:18px !important;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div><div class="glossary-card-body"><div class="glossary-card-content"><div class="glossary-img"><img src="img/${item.es}.jpg" onerror="this.style.display='none';this.parentNode.textContent='${item.icon}'" /></div><div class="glossary-desc">${item.desc}<br><span class="glossary-tip">${item.tip}</span></div></div></div>`; card.querySelector('.glossary-card-header').addEventListener('click', () => { document.querySelectorAll('.glossary-card.open').forEach(c => c !== card && c.classList.remove('open')); card.classList.toggle('open'); }); dom.glossaryList.appendChild(card); });
+  items.forEach(item => { const card = document.createElement('div'); card.className = 'glossary-card'; card.innerHTML = `<div class="glossary-card-header"><div class="glossary-abbrev"><span class="abbrev-es">${item.es}</span><span class="abbrev-en">${item.en}</span></div><div class="glossary-info"><div class="glossary-term">${item.name}</div><div class="glossary-short">${item.short}</div></div><svg class="glossary-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div><div class="glossary-card-body"><div class="glossary-card-content"><div class="glossary-img"><img src="img/${item.es}.jpg" onerror="this.style.display='none';this.parentNode.textContent='${item.icon}'" /></div><div class="glossary-desc">${item.desc}<br><span class="glossary-tip">${item.tip}</span></div></div></div>`; card.querySelector('.glossary-card-header').addEventListener('click', () => { document.querySelectorAll('.glossary-card.open').forEach(c => c !== card && c.classList.remove('open')); card.classList.toggle('open'); }); dom.glossaryList.appendChild(card); });
 }
 dom.glossarySearch.addEventListener('input', () => { const q = dom.glossarySearch.value.toLowerCase().trim(); const ds = state.lang === 'en' ? GLOSSARY_EN : GLOSSARY; renderGlossary(q ? ds.filter(i => i.es.includes(q) || i.en.includes(q) || i.name.toLowerCase().includes(q)) : ds); });
 
 dom.projectTabs.forEach(tab => tab.addEventListener('click', () => { dom.projectTabs.forEach(t => t.classList.toggle('active-tab', t === tab)); document.querySelectorAll('.tab-panel').forEach(p => p.style.display = p.id === `tab-${tab.dataset.tab}` ? 'grid' : 'none'); }));
 
-// CARGA DE PROYECTOS (LOCAL)
+// CARGA EXCLUSIVAMENTE DESDE EL CACHÉ LOCAL (PROYECTOS)
 function fetchProjectsFromDB() {
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
@@ -352,7 +352,6 @@ function renderProjectsGrid() {
       } else { 
         dom.npPhotoPreview.style.display = 'none'; 
       }
-      populateThreadsPicker(proj.assignedThreads || []);
       dom.modalNewProject.classList.add('open');
     });
 
@@ -360,6 +359,7 @@ function renderProjectsGrid() {
       dom.wsProjName.textContent = proj.nombre; 
       dom.wsCounterName.textContent = proj.nombre; 
       dom.wsProjMeta.textContent = `${proj.nivel || ''} · Aguja ${proj.hook || 'No definida'}`; 
+      dom.wsProjTags.innerHTML = `<li><span>Aguja recomendada: ${proj.hook || 'X'}</span></li>`;
       
       const lines = (proj.patron_texto || '').split('\n').filter(l => l.trim() !== '');
       let globalRoundCounter = 0;
@@ -379,7 +379,7 @@ function renderProjectsGrid() {
               <div class="pattern-phase">
                 <button class="phase-toggle" data-target="phase-${phaseIdCounter}" aria-expanded="true">
                   <span class="phase-label"><span class="phase-ico">🌸</span> <span>${currentPhaseName}</span></span>
-                  <svg class="phase-chevron" width="18" height="18" style="width:18px !important; height:18px !important; min-width:18px !important;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                  <svg class="phase-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                 </button>
                 <div class="phase-body" id="phase-${phaseIdCounter}"><div class="pattern-rounds">${currentPhaseRoundsHTML}</div></div>
               </div>`;
@@ -417,38 +417,19 @@ function renderProjectsGrid() {
           <div class="pattern-phase">
             <button class="phase-toggle" data-target="phase-${phaseIdCounter}" aria-expanded="true">
               <span class="phase-label"><span class="phase-ico">🌸</span> <span>${currentPhaseName}</span></span>
-              <svg class="phase-chevron" width="18" height="18" style="width:18px !important; height:18px !important; min-width:18px !important;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+              <svg class="phase-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
             <div class="phase-body" id="phase-${phaseIdCounter}"><div class="pattern-rounds">${currentPhaseRoundsHTML}</div></div>
           </div>`;
       }
 
-      let hilosHTML = '';
-      if (proj.assignedThreads && proj.assignedThreads.length > 0) {
-        proj.assignedThreads.forEach(thId => {
-          const found = localThreads.find(t => t.id === thId);
-          if (found) {
-            hilosHTML += `
-              <li style="display:flex; align-items:center; gap:8px; margin-top:4px;">
-                <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:${found.color}; border:1px solid rgba(0,0,0,0.15);"></span>
-                <span><strong>${found.name}:</strong> ${found.type} (${found.grams}g disponibles)</span>
-              </li>`;
-          }
-        });
-      }
-
       const materialesHTML = `
         <div class="pattern-phase">
           <button class="phase-toggle" data-target="phase-mat" aria-expanded="true">
-            <span class="phase-label"><span class="phase-ico">🧵</span> <span data-i18n="phase.materials">Detalles y Materiales</span></span>
-            <svg class="phase-chevron" width="18" height="18" style="width:18px !important; height:18px !important; min-width:18px !important;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            <span class="phase-label"><span class="phase-ico">🧵</span> <span data-i18n="phase.materials">Detalles</span></span>
+            <svg class="phase-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
-          <div class="phase-body" id="phase-mat">
-            <ul class="pattern-list" id="wsProjTags">
-              <li><span>Aguja recomendada: ${proj.hook || 'X'}</span></li>
-              ${hilosHTML ? `<li><span>Hilos asignados:</span><ul style="padding-left:14px; list-style:none;">${hilosHTML}</ul></li>` : ''}
-            </ul>
-          </div>
+          <div class="phase-body" id="phase-mat"><ul class="pattern-list" id="wsProjTags"><li><span>Aguja recomendada: ${proj.hook || 'X'}</span></li></ul></div>
         </div>`;
 
       dom.patternContent.innerHTML = `<div class="pattern-intro"><h3 class="pattern-name" id="wsProjName">${proj.nombre}</h3><p class="pattern-meta" id="wsProjMeta">${proj.nivel || ''} · Aguja ${proj.hook || 'No definida'}</p></div>` + materialesHTML + phasesHTML;
@@ -468,34 +449,6 @@ function renderProjectsGrid() {
 
     if(proj.estado === 'todo') dom.tabTodo.appendChild(card); else if(proj.estado === 'wip') dom.tabWip.appendChild(card); else dom.tabRedo.appendChild(card);
   });
-}
-
-function populateThreadsPicker(assignedIds = []) {
-  if (!dom.npThreadsPicker) return;
-  dom.npThreadsPicker.innerHTML = '';
-
-  if (localThreads.length === 0) {
-    dom.npThreadsPicker.innerHTML = `<span style="font-size:0.8rem; color:var(--text-sub);">No hay hilos en "Mis Hilos". Agrega algunos primero.</span>`;
-    return;
-  }
-
-  localThreads.forEach(th => {
-    const isChecked = assignedIds.includes(th.id) ? 'checked' : '';
-    const chip = document.createElement('label');
-    chip.style.cssText = `display:inline-flex; align-items:center; gap:6px; padding:4px 10px; background:rgba(0,0,0,0.04); border-radius:20px; font-size:0.8rem; cursor:pointer; user-select:none; border:1px solid rgba(0,0,0,0.06);`;
-    chip.innerHTML = `
-      <input type="checkbox" value="${th.id}" ${isChecked} style="cursor:pointer;" />
-      <span style="width:10px; height:10px; border-radius:50%; background:${th.color}; display:inline-block;"></span>
-      <span>${th.name} (${th.grams}g)</span>
-    `;
-    dom.npThreadsPicker.appendChild(chip);
-  });
-}
-
-function getSelectedThreadsFromPicker() {
-  if (!dom.npThreadsPicker) return [];
-  const checked = dom.npThreadsPicker.querySelectorAll('input[type="checkbox"]:checked');
-  return Array.from(checked).map(cb => cb.value);
 }
 
 let currentProjPhotoBase64 = ''; 
@@ -521,7 +474,6 @@ dom.btnNewProject.addEventListener('click', () => {
   currentProjPhotoBase64 = ''; 
   dom.npPhotoPreview.style.display = 'none'; 
   dom.npPhotoUpload.value = '';
-  populateThreadsPicker([]);
   dom.modalNewProject.classList.add('open'); 
   setTimeout(() => dom.npName.focus(), 320); 
 });
@@ -541,8 +493,7 @@ dom.btnNpSave.addEventListener('click', () => {
     hook: dom.npHook.value, 
     video_url: dom.npVideo.value.trim(), 
     patron_texto: dom.npPattern.value, 
-    foto: currentProjPhotoBase64,
-    assignedThreads: getSelectedThreadsFromPicker()
+    foto: currentProjPhotoBase64 
   };
   
   if (!data.nombre) return showToast('⚠️ Ingresa el nombre del proyecto');
@@ -567,7 +518,7 @@ dom.btnFormatPattern.addEventListener('click', () => {
   showToast('✨ Patrón formateado'); 
 });
 
-// ================= GESTIÓN DE HILOS =================
+// ================= GESTIÓN DE HILOS (PERSISTENCIA LOCAL) =================
 function loadThreads() {
   try {
     const cached = localStorage.getItem('loopie_threads_cache');
@@ -606,6 +557,7 @@ function renderMaterialsList() {
       <button class="delete-proj-btn" style="position:static; margin-left:6px; background:rgba(220,50,50,0.15); color:var(--rose-500);" title="Eliminar hilo" data-del="${idx}">🗑️</button>
     `;
 
+    // Reducir gramos
     item.querySelector('.btn-minus-g').addEventListener('click', (e) => {
       e.stopPropagation();
       const i = parseInt(e.target.dataset.idx, 10);
@@ -614,6 +566,7 @@ function renderMaterialsList() {
       renderMaterialsList();
     });
 
+    // Aumentar gramos
     item.querySelector('.btn-plus-g').addEventListener('click', (e) => {
       e.stopPropagation();
       const i = parseInt(e.target.dataset.idx, 10);
@@ -622,6 +575,7 @@ function renderMaterialsList() {
       renderMaterialsList();
     });
 
+    // Eliminar hilo
     item.querySelector('[data-del]').addEventListener('click', (e) => {
       e.stopPropagation();
       const i = parseInt(e.currentTarget.dataset.del, 10);
@@ -673,8 +627,8 @@ let toastTimeout; function showToast(msg) { clearTimeout(toastTimeout); dom.toas
 
 function initApp() {
   document.querySelectorAll('.round-instructions').forEach(el => el.innerHTML = parseMarkdown(el.innerHTML));
-  loadThreads(); 
   fetchProjectsFromDB(); 
+  loadThreads(); // Cargar hilos almacenados
 
   const saved = JSON.parse(localStorage.getItem('loopie_progress'));
   if(saved) { state.currentRound = saved.round || 1; state.stitchCount = saved.stitches || 0; state.timerSeconds = saved.timer || 0; state.quickNotes = saved.notes || {}; dom.stitchCount.textContent = state.stitchCount; dom.timerDisplay.textContent = formatTimer(state.timerSeconds); }
