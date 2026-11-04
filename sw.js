@@ -1,7 +1,7 @@
 /* ================================================================
    LOOPIESTUDIO — sw.js v10 (Restauración Tema Neón Original)
    ================================================================ */
-const CACHE_NAME = 'loopiestudio-v10';
+const CACHE_NAME = 'loopiestudio-v20';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
