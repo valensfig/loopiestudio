@@ -1,7 +1,7 @@
 /* ================================================================
-   LOOPIESTUDIO — Service Worker (Caché Offline Relativo PWA)
+   LOOPIESTUDIO — sw.js v3 (Service Worker Completo)
    ================================================================ */
-const CACHE_NAME = 'loopiestudio-v2';
+const CACHE_NAME = 'loopiestudio-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -12,9 +12,7 @@ const ASSETS_TO_CACHE = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
   );
   self.skipWaiting();
 });
@@ -33,11 +31,11 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Ignorar peticiones a la API para que app.js gestione el guardado local sin interferencias
-  if (event.request.url.includes('api.php')) {
-    return;
-  }
-  
+  if (event.request.url.includes('api.php')) return;
+  event.respondWith(
+    caches.match(event.request).then((cachedResponse) => cachedResponse || fetch(event.request))
+  );
+});
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       return cachedResponse || fetch(event.request);
