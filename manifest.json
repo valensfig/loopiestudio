@@ -1,17 +1,22 @@
 {
-  "name": "CrochetApp",
-  "short_name": "CrochetApp",
-  "description": "Tu estación de trabajo para proyectos de crochet",
-  "start_url": "/",
+  "name": "LoopieStudio",
+  "short_name": "Loopie",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#fdf8f3",
-  "theme_color": "#f4a8b8",
-  "orientation": "portrait",
+  "background_color": "#fdf9f4",
+  "theme_color": "#fdf4f0",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%23f4a8b8'/><text y='140' font-size='120' text-anchor='middle' x='96'>🧶</text></svg>",
+      "src": "./icon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
