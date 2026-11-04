@@ -1,11 +1,11 @@
 /* ================================================================
-   LOOPIESTUDIO — sw.js v9 (Iconos Minimalistas + Ovillo Giratorio)
+   LOOPIESTUDIO — sw.js v10 (Restauración Tema Neón Original)
    ================================================================ */
-const CACHE_NAME = 'loopiestudio-v9';
+const CACHE_NAME = 'loopiestudio-v10';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './style.css?v=4',
+  './style.css?v=5',
   './app.js',
   './manifest.json'
 ];
