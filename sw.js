@@ -1,11 +1,11 @@
 /* ================================================================
-   LOOPIESTUDIO — sw.js v7 (Fuerza Actualización CSS y SVGs)
+   LOOPIESTUDIO — sw.js v9 (Iconos Minimalistas + Ovillo Giratorio)
    ================================================================ */
-const CACHE_NAME = 'loopiestudio-v7';
+const CACHE_NAME = 'loopiestudio-v9';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './style.css?v=2',
+  './style.css?v=4',
   './app.js',
   './manifest.json'
 ];
@@ -34,10 +34,5 @@ self.addEventListener('fetch', (event) => {
   if (event.request.url.includes('api.php')) return;
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => cachedResponse || fetch(event.request))
-  );
-});
-    caches.match(event.request).then((cachedResponse) => {
-      return cachedResponse || fetch(event.request);
-    })
   );
 });
