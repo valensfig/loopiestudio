@@ -1,7 +1,7 @@
 /* ================================================================
    LOOPIESTUDIO — sw.js v3 (Service Worker Completo)
    ================================================================ */
-const CACHE_NAME = 'loopiestudio-v3';
+const CACHE_NAME = 'loopiestudio-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
