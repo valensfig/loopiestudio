@@ -1,46 +1,45 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="light">
+<html lang="es" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>LoopieStudio</title>
-  <link rel="manifest" href="./manifest.json?v=5" />
-  <meta name="theme-color" content="#fdf4f0" />
-  <link rel="stylesheet" href="./style.css?v=4" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="manifest" href="./manifest.json?v=6" />
+  <meta name="theme-color" content="#140d12" />
+  <link rel="stylesheet" href="./style.css?v=5" />
 </head>
 <body>
 
-  <!-- BARRA SUPERIOR -->
+  <!-- CABECERA -->
   <header class="app-header">
     <div class="header-logo">
-      <div class="spinning-yarn-box">
-        <svg class="spinning-yarn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="9" />
-          <path d="M12 3a9 9 0 0 1 9 9" />
-          <path d="M12 21a9 9 0 0 1-9-9" />
-          <path d="M3.6 9a9 9 0 0 1 14.8-3.4" />
-          <path d="M20.4 15a9 9 0 0 1-14.8 3.4" />
-        </svg>
-      </div>
+      <!-- OVILLO ORIGINAL CON HILO DESENROLLADO -->
+      <svg class="yarn-logo-svg" viewBox="0 0 32 32" fill="none">
+        <circle cx="15" cy="15" r="11" stroke="#ff4b81" stroke-width="2.5" />
+        <path d="M7 11c3 1.5 8 5 11 11" stroke="#ff4b81" stroke-width="2" stroke-linecap="round" />
+        <path d="M11 7c2 3.5 5 8 11 11" stroke="#ff4b81" stroke-width="2" stroke-linecap="round" />
+        <path d="M19 8c-1.5 3-4 7-11 11" stroke="#ff4b81" stroke-width="2" stroke-linecap="round" />
+        <path d="M15 26c-2 2-5 3.5-9 3" stroke="#ff4b81" stroke-width="2" stroke-linecap="round" />
+      </svg>
       <h1 class="logo-title">LoopieStudio</h1>
     </div>
     <div class="header-actions">
-      <button class="icon-btn" id="btnPalette" title="Paleta de colores">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+      <!-- PALETA -->
+      <button class="icon-btn-ghost" id="btnPalette" title="Paleta">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.6-.7 1.6-1.7 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1a1.6 1.6 0 0 1 1.7-1.7h2c3 0 5.5-2.5 5.5-5.5C22 6 17.5 2 12 2z"/></svg>
       </button>
+      <!-- IDIOMA -->
       <button class="lang-toggle" id="btnLang">
         <span class="lang-label" data-i18n="lang.es">ES</span> / <span class="lang-label" data-i18n="lang.en">EN</span>
       </button>
-      <button class="icon-btn" id="btnTheme" title="Cambiar tema">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <!-- TEMA OSCURO/CLARO -->
+      <button class="icon-btn-ghost" id="btnTheme" title="Tema">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
     </div>
   </header>
 
-  <!-- PALETA DE COLORES DESPLEGABLE -->
+  <!-- PALETA DESPLEGABLE -->
   <section class="palette-strip" id="paletteStrip">
     <div class="palette-info">
       <span class="palette-label" data-i18n="palette.label">Paleta sugerida</span>
@@ -55,350 +54,299 @@
 
   <!-- VISTA 1: ESPACIO DE TRABAJO (TALLER) -->
   <main class="view-panel active" id="viewWorkstation">
-    <!-- PANEL DE VIDEO / TUTORIAL -->
-    <section class="video-accordion">
+    <!-- PANEL TUTORIAL -->
+    <section class="card-accordion">
       <header class="accordion-header" id="videoToggleHeader">
         <div class="accordion-title">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-          <span data-i18n="panel.tutorial">Tutorial</span>
+          <span>🎬</span> <span data-i18n="panel.tutorial">TUTORIAL</span>
         </div>
         <div class="accordion-controls">
-          <button class="btn-change-video-icon" id="btnChangeVideo" title="Cambiar enlace de video">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-          </button>
-          <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          <span class="accordion-menu-dots" id="btnChangeVideo">•••</span>
+          <svg class="accordion-chevron-svg" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
       </header>
       <div class="accordion-body" id="videoCollapseBody">
         <div class="video-container" id="videoWrapper">
           <div class="video-placeholder" id="videoPlaceholder">
-            <div class="placeholder-icon-wrap">
-              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="3" ry="3"/><polygon points="10 8 16 11 10 14 10 8"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="8" y1="21" x2="16" y2="21"/></svg>
-            </div>
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="3"/><polygon points="10 8 16 11 10 14 10 8"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="8" y1="21" x2="16" y2="21"/></svg>
             <p>Vincula un tutorial de YouTube o redes sociales</p>
-            <button class="btn-secondary" id="btnAddVideo" data-i18n="btn.addTutorial">Agregar tutorial</button>
+            <button class="btn-primary-action" id="btnAddVideo" data-i18n="btn.addTutorial">Agregar tutorial</button>
           </div>
-          <div class="external-link-panel" id="externalLinkWrapper" style="display: none;">
-            <div class="external-icon-wrap" id="externalIcon">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-            </div>
-            <p id="externalPlatform">Red social detectada</p>
-            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-primary" id="openExternalBtn" data-i18n="btn.openApp">Abrir en la App</a>
-            <button class="btn-text" id="btnChangeExternal" data-i18n="btn.changeLink">Cambiar enlace</button>
+          <div class="external-link-panel" id="externalLinkWrapper" style="display: none; padding:20px; text-align:center;">
+            <p id="externalPlatform" style="margin-bottom:8px; font-weight:700;">Red social detectada</p>
+            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-primary-action" id="openExternalBtn" data-i18n="btn.openApp">Abrir en la App</a>
+            <button class="btn-modal-cancel" id="btnChangeExternal" style="margin-top:8px;" data-i18n="btn.changeLink">Cambiar enlace</button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- PANEL DEL PATRÓN -->
+    <!-- PANEL PATRÓN -->
     <section class="pattern-panel">
-      <div class="pattern-header-bar">
-        <div class="pattern-tag">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-          <span data-i18n="panel.pattern">Patrón</span>
+      <div class="pattern-header-row">
+        <div class="pattern-header-title">
+          <span>📋</span> <span data-i18n="panel.pattern">PATRÓN</span>
         </div>
-        <div class="pattern-header-actions">
-          <button class="btn-action-sm" id="btnTranslate">ES / EN</button>
-          <span class="badge" id="patternProgressBadge">V. 1</span>
+        <div class="pattern-badges-row">
+          <span class="badge-round-v" id="patternProgressBadge">V. 1</span>
+          <button class="btn-trans-circle" id="btnTranslate">文A</button>
         </div>
       </div>
       <div class="pattern-content" id="patternContent">
-        <div class="pattern-intro">
-          <h3 class="pattern-name" id="wsProjName">Cargando proyecto...</h3>
-          <p class="pattern-meta" id="wsProjMeta">Principiante · Aguja 2.5mm</p>
+        <div class="pattern-intro" style="margin-bottom: 12px;">
+          <h3 id="wsProjName" style="font-size: 1.1rem; font-weight: 800;">Cargando...</h3>
+          <p id="wsProjMeta" style="font-size: 0.78rem; color: var(--text-sub);">Principiante · Aguja 2.5mm</p>
         </div>
       </div>
     </section>
 
-    <!-- CONTADOR DE VUELTAS Y PUNTOS FLOTANTE -->
+    <!-- CONTADOR FLOTANTE -->
     <footer class="counter-dock">
       <div class="counter-top-row">
-        <div class="counter-timer-pill">
-          <span id="timerDisplay">00:00:00</span>
-          <button id="btnTimerToggle" class="timer-play-btn" title="Iniciar/Pausar cronómetro">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          </button>
+        <div class="project-meta-info">
+          <span class="ws-proj-title" id="wsCounterName">Proyecto</span>
+          <span class="ws-proj-status" data-i18n="status.wip">En progreso</span>
         </div>
-        <span class="counter-project-name" id="wsCounterName">Proyecto</span>
-        <button class="icon-btn-ghost" id="btnReset" title="Reiniciar vuelta">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+        <div class="timer-pill">
+          <span id="timerDisplay">00:00:00</span>
+          <button class="timer-btn-orange" id="btnTimerToggle">▶</button>
+        </div>
+        <button class="btn-reset-round" id="btnReset" title="Reiniciar vuelta">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
         </button>
       </div>
 
-      <div class="counter-main-box">
-        <div class="round-control-row">
-          <button class="counter-btn round-btn" id="btnMinus">−</button>
-          <div class="counter-indicator">
-            <span class="counter-label" data-i18n="counter.current">VUELTA ACTUAL</span>
-            <div class="counter-numbers">
-              <span class="counter-huge" id="counterNumber">1</span>
-              <span class="counter-sub" id="counterTotal">de 1</span>
-            </div>
+      <div class="counter-round-label" data-i18n="counter.current">VUELTA ACTUAL</div>
+      <div class="counter-huge-number" id="counterNumber">1</div>
+      <div class="counter-gradient-bar"></div>
+
+      <div class="counter-controls-row">
+        <button class="btn-round-minus" id="btnMinus">−</button>
+        
+        <div class="stitch-pill-box">
+          <span class="stitch-pill-title" data-i18n="counter.stitches">PUNTOS</span>
+          <div class="stitch-inner-row">
+            <button class="stitch-btn-step" id="btnStitchMinus">−</button>
+            <span class="stitch-count-huge" id="stitchCount">0</span>
+            <button class="stitch-btn-step" id="btnStitchPlus">+</button>
           </div>
-          <button class="counter-btn round-btn" id="btnPlus">+</button>
         </div>
-        <div class="counter-progress-bar">
-          <div class="counter-progress-fill" id="counterProgressFill"></div>
-        </div>
+
+        <button class="btn-round-plus" id="btnPlus">+</button>
       </div>
 
-      <div class="counter-bottom-row">
-        <div class="stitch-pill">
-          <span class="stitch-label" data-i18n="counter.stitches">PUNTOS</span>
-          <div class="stitch-controls">
-            <button class="stitch-btn" id="btnStitchMinus">−</button>
-            <span class="stitch-val" id="stitchCount">0</span>
-            <button class="stitch-btn" id="btnStitchPlus">+</button>
-          </div>
-        </div>
-        <input type="text" class="quick-note-input" id="quickNoteInput" placeholder="Nota para vuelta 1..." />
-      </div>
+      <input type="text" class="quick-note-dock-input" id="quickNoteInput" placeholder="📝 Nota para vuelta 1..." />
     </footer>
   </main>
 
   <!-- VISTA 2: PROYECTOS -->
   <main class="view-panel" id="viewProjects">
-    <header class="section-header">
-      <h2 data-i18n="view.projects">Proyectos</h2>
-      <button class="btn-primary" id="btnNewProject">+ <span data-i18n="btn.new">Nuevo</span></button>
-    </header>
-    <nav class="project-tabs">
-      <button class="project-tab active-tab" data-tab="todo" data-i18n="tab.todo">Por hacer</button>
-      <button class="project-tab" data-tab="wip" data-i18n="tab.wip">En proceso</button>
-      <button class="project-tab" data-tab="redo" data-i18n="tab.redo">Volviendo</button>
-    </nav>
-    <section class="tab-panel active" id="tab-todo"></section>
-    <section class="tab-panel" id="tab-wip" style="display: none;"></section>
-    <section class="tab-panel" id="tab-redo" style="display: none;"></section>
+    <div class="section-header-row">
+      <h2 class="section-title" data-i18n="view.projects">Proyectos</h2>
+      <button class="btn-primary-action" id="btnNewProject">+ <span data-i18n="btn.new">Nuevo</span></button>
+    </div>
+    <div class="project-tabs-row">
+      <button class="proj-tab-btn active-tab" data-tab="todo" data-i18n="tab.todo">Por hacer</button>
+      <button class="proj-tab-btn" data-tab="wip" data-i18n="tab.wip">En proceso</button>
+      <button class="proj-tab-btn" data-tab="redo" data-i18n="tab.redo">Volviendo</button>
+    </div>
+    <div class="projects-grid tab-panel active" id="tab-todo"></div>
+    <div class="projects-grid tab-panel" id="tab-wip" style="display: none;"></div>
+    <div class="projects-grid tab-panel" id="tab-redo" style="display: none;"></div>
   </main>
 
   <!-- VISTA 3: MIS HILOS -->
   <main class="view-panel" id="viewMaterials">
-    <header class="section-header">
-      <h2 data-i18n="view.materials">Mis Hilos</h2>
-      <button class="btn-primary" id="btnAddThread">+ <span data-i18n="btn.add">Agregar</span></button>
-    </header>
-    <section class="materials-list" id="materialsList"></section>
+    <div class="section-header-row">
+      <h2 class="section-title" data-i18n="view.materials">Mis Hilos</h2>
+      <button class="btn-primary-action" id="btnAddThread">+ <span data-i18n="btn.add">Agregar</span></button>
+    </div>
+    <div class="threads-stack" id="materialsList"></div>
   </main>
 
   <!-- VISTA 4: CALCULADORA -->
   <main class="view-panel" id="viewCalculator">
-    <header class="section-header">
-      <h2 data-i18n="calc.tabTitle">Calculadora</h2>
-    </header>
-    <section class="calc-card">
-      <h3 class="calc-card-title" data-i18n="calc.title">Cierre de Proyecto</h3>
+    <div class="section-header-row">
+      <h2 class="section-title" data-i18n="calc.tabTitle">Calculadora</h2>
+    </div>
+    <div class="calc-card-box">
+      <h3 class="calc-title-h3" data-i18n="calc.title">Cierre de Proyecto</h3>
       
-      <div class="calc-group">
+      <div class="calc-form-group">
         <label data-i18n="calc.yarnSmart">Madeja: Precio ÷ Gramos totales</label>
-        <div class="calc-row">
+        <div class="calc-inputs-row">
           <input type="number" id="calcYarnPrice" placeholder="Precio $" step="0.1" />
           <input type="number" id="calcYarnTotalG" placeholder="Gramos totales (ej 100)" />
         </div>
       </div>
 
-      <div class="calc-group">
+      <div class="calc-form-group">
         <label data-i18n="calc.yarnUsed">Gramos usados en el tejido</label>
-        <div class="calc-row">
+        <div class="calc-inputs-row">
           <input type="number" id="calcYarnUsedG" placeholder="Gramos usados (ej 35)" />
-          <span class="calc-badge-cost" id="calcYarnCostResult">$0.00 en hilo</span>
+          <span class="calc-cost-pill" id="calcYarnCostResult">$0.00 en hilo</span>
         </div>
       </div>
 
-      <div class="calc-group">
+      <div class="calc-form-group">
         <label data-i18n="calc.labor">Horas × tarifa/hr</label>
-        <div class="calc-row">
+        <div class="calc-inputs-row">
           <input type="number" id="calcHours" placeholder="Horas" step="0.1" />
           <input type="number" id="calcRate" placeholder="$/hr" step="0.1" />
         </div>
       </div>
 
-      <div class="calc-group">
-        <label data-i18n="calc.extras">Materiales extras (ojitos, relleno, argolla)</label>
+      <div class="calc-form-group">
+        <label data-i18n="calc.extras">Materiales extras (ojitos, relleno)</label>
         <input type="number" id="calcExtras" placeholder="Costo extras $" step="0.1" />
       </div>
 
-      <div class="calc-group">
+      <div class="calc-form-group">
         <label data-i18n="calc.price">Precio final de venta</label>
         <input type="number" id="calcPrice" placeholder="Precio al cliente $" step="0.1" />
       </div>
 
-      <div class="calc-summary" id="calcResult">
-        <div class="summary-line">
+      <div class="calc-total-box" id="calcResult">
+        <div class="calc-total-line">
           <span data-i18n="calc.total">Costo total:</span>
           <strong id="calcTotal">$0.00</strong>
         </div>
-        <div class="summary-line">
+        <div class="calc-profit-line">
           <span data-i18n="calc.profit">Ganancia neta:</span>
           <strong id="calcProfit">$0.00</strong>
         </div>
       </div>
 
-      <div class="calc-buttons">
-        <button class="btn-primary full-width" id="btnCalc" data-i18n="btn.calculate">Calcular</button>
-        <button class="btn-whatsapp full-width" id="btnCopyQuote" style="display: none;" data-i18n="btn.copyQuote">Copiar para WhatsApp</button>
-      </div>
-    </section>
+      <button class="btn-primary-action" style="width:100%;" id="btnCalc" data-i18n="btn.calculate">Calcular</button>
+      <button class="btn-primary-action" style="width:100%; background:#25d366; margin-top:8px; display:none;" id="btnCopyQuote" data-i18n="btn.copyQuote">📲 WhatsApp</button>
+    </div>
   </main>
 
   <!-- VISTA 5: GLOSARIO -->
   <main class="view-panel" id="viewGlossary">
-    <header class="section-header">
-      <h2 data-i18n="view.glossary">Glosario</h2>
-    </header>
-    <div class="glossary-search-wrapper">
-      <input type="text" class="search-input" id="glossarySearch" placeholder="Buscar punto o abreviatura..." />
+    <div class="section-header-row">
+      <h2 class="section-title" data-i18n="view.glossary">Glosario</h2>
     </div>
-    <section class="glossary-grid" id="glossaryList"></section>
+    <input type="text" class="search-glossary-box" id="glossarySearch" placeholder="🔍 Buscar punto o abreviatura..." />
+    <div class="glossary-stack" id="glossaryList"></div>
   </main>
 
-  <!-- BARRA DE NAVEGACIÓN INFERIOR (ICONOS VECTORIALES AESTHETIC) -->
+  <!-- BARRA INFERIOR (ICONOS VECTORIALES ORIGINALES) -->
   <nav class="bottom-nav">
     <button class="nav-item active-nav" data-view="viewWorkstation">
-      <span class="nav-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-      </span>
+      <svg class="nav-icon-svg" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
       <span class="nav-text" data-i18n="nav.work">Trabajo</span>
     </button>
     <button class="nav-item" data-view="viewProjects">
-      <span class="nav-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-      </span>
+      <svg class="nav-icon-svg" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
       <span class="nav-text" data-i18n="nav.projects">Proyectos</span>
     </button>
     <button class="nav-item" data-view="viewMaterials">
-      <span class="nav-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 9 9"/><path d="M12 21a9 9 0 0 1-9-9"/><path d="M3.6 9a9 9 0 0 1 14.8-3.4"/></svg>
-      </span>
+      <svg class="nav-icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 9 9"/><path d="M12 21a9 9 0 0 1-9-9"/><path d="M3.6 9a9 9 0 0 1 14.8-3.4"/></svg>
       <span class="nav-text" data-i18n="nav.yarns">Hilos</span>
     </button>
     <button class="nav-item" data-view="viewCalculator">
-      <span class="nav-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
-      </span>
+      <svg class="nav-icon-svg" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01"/></svg>
       <span class="nav-text" data-i18n="nav.calc">Calculadora</span>
     </button>
     <button class="nav-item" data-view="viewGlossary">
-      <span class="nav-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-      </span>
+      <svg class="nav-icon-svg" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
       <span class="nav-text" data-i18n="nav.glossary">Glosario</span>
     </button>
   </nav>
 
-  <!-- MODAL: AGREGAR TUTORIAL -->
+  <!-- MODAL TUTORIAL -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal-card">
-      <div class="modal-title-row">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-        <h3 data-i18n="modal.videoTitle">Agregar Tutorial</h3>
-      </div>
-      <input type="text" class="text-input" id="videoUrlInput" placeholder="Pega el enlace de YouTube o redes sociales..." />
-      <div class="modal-actions">
-        <button class="btn-secondary" id="btnModalCancel" data-i18n="btn.cancel">Cancelar</button>
-        <button class="btn-primary" id="btnModalConfirm" data-i18n="btn.load">Cargar</button>
+      <h3 class="modal-header-h3" data-i18n="modal.videoTitle">🎬 Agregar Tutorial</h3>
+      <input type="text" class="input-text-standard" id="videoUrlInput" placeholder="Pega el enlace de YouTube..." />
+      <div class="modal-actions-row">
+        <button class="btn-modal-cancel" id="btnModalCancel" data-i18n="btn.cancel">Cancelar</button>
+        <button class="btn-modal-save" id="btnModalConfirm" data-i18n="btn.load">Cargar</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: NUEVO / EDITAR PROYECTO -->
+  <!-- MODAL PROYECTO (CON SELECTOR DE HILOS) -->
   <div class="modal-overlay" id="modalNewProject">
-    <div class="modal-card modal-large">
-      <div class="modal-title-row">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        <h3 data-i18n="modal.projTitle">Proyecto</h3>
-      </div>
+    <div class="modal-card modal-scroll-area">
+      <h3 class="modal-header-h3" data-i18n="modal.projTitle">🌟 Proyecto</h3>
       <input type="hidden" id="npId" />
       
-      <div class="form-group-center">
-        <img id="npPhotoPreview" class="photo-preview" style="display:none;" />
-        <label class="btn-file-upload">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          <span data-i18n="btn.photo">Subir imagen</span>
+      <div style="text-align:center; margin-bottom: 8px;">
+        <img id="npPhotoPreview" style="width:70px; height:70px; border-radius:12px; object-fit:cover; display:none; margin:0 auto 6px auto;" />
+        <label class="btn-modal-cancel" style="display:inline-block; font-size:0.78rem; cursor:pointer;">
+          📷 <span data-i18n="btn.photo">Subir imagen</span>
           <input type="file" id="npPhotoUpload" accept="image/*" style="display:none;" />
         </label>
       </div>
 
-      <div class="form-group">
-        <input type="text" id="npName" class="text-input" placeholder="Nombre del proyecto..." />
-      </div>
+      <input type="text" id="npName" class="input-text-standard" placeholder="Nombre del proyecto..." />
 
-      <div class="form-row">
-        <select id="npLevel" class="text-input">
+      <div style="display:flex; gap:8px;">
+        <select id="npLevel" class="input-text-standard">
           <option value="" disabled selected data-i18n="opt.level">Nivel...</option>
           <option value="Principiante">Principiante</option>
           <option value="Intermedio">Intermedio</option>
           <option value="Avanzado">Avanzado</option>
         </select>
-        <select id="npStatus" class="text-input">
+        <select id="npStatus" class="input-text-standard">
           <option value="todo" data-i18n="tab.todo">Por hacer</option>
           <option value="wip" data-i18n="tab.wip">En proceso</option>
           <option value="redo" data-i18n="tab.redo">Volviendo</option>
         </select>
       </div>
 
-      <div class="form-row">
-        <input type="text" id="npTags" class="text-input" placeholder="Etiquetas (separadas por coma)..." />
-        <input type="text" id="npHook" class="text-input" placeholder="Aguja (ej 2.5mm)..." />
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="npTags" class="input-text-standard" placeholder="Etiquetas (separadas por coma)..." />
+        <input type="text" id="npHook" class="input-text-standard" placeholder="Aguja (ej 2.5mm)..." />
       </div>
 
-      <div class="form-group">
-        <input type="text" id="npVideo" class="text-input" placeholder="Enlace de video / tutorial..." />
-      </div>
+      <input type="text" id="npVideo" class="input-text-standard" placeholder="Enlace de video / tutorial..." />
 
-      <!-- SELECTOR DE HILOS DISPONIBLES DE TU INVENTARIO -->
-      <div class="form-group" style="margin-bottom: 12px;">
-        <label style="font-size: 0.85rem; font-weight: 700; color: var(--text-sub); display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>
-          Hilos para este proyecto (de tu inventario):
+      <!-- SELECTOR DE HILOS VINCULADOS -->
+      <div>
+        <label style="font-size:0.8rem; font-weight:700; color:var(--text-sub); display:block; margin-bottom:4px;">
+          🧶 Hilos para este proyecto (de tu inventario):
         </label>
-        <div id="npThreadsPicker" class="threads-picker-box" style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 120px; overflow-y: auto; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 14px;"></div>
+        <div id="npThreadsPicker" style="display:flex; flex-wrap:wrap; gap:6px; max-height:100px; overflow-y:auto; padding:8px; background:var(--bg-surface); border:1px solid var(--border-color); border-radius:12px;"></div>
       </div>
 
-      <div class="form-group">
-        <div class="form-label-row">
-          <label style="font-size: 0.85rem; font-weight: 700; color: var(--text-sub); display: flex; align-items: center; gap: 6px;" data-i18n="modal.pastePattern">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            Patrón
-          </label>
-          <button type="button" class="btn-action-xs" id="btnFormatPattern" data-i18n="btn.format">Formatear</button>
+      <div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+          <label style="font-size:0.8rem; font-weight:700; color:var(--text-sub);" data-i18n="modal.pastePattern">📋 Patrón</label>
+          <button type="button" class="btn-modal-cancel" style="padding:2px 8px; font-size:0.72rem;" id="btnFormatPattern" data-i18n="btn.format">Formatear</button>
         </div>
-        <textarea id="npPattern" class="text-area" rows="6" placeholder="[cabeza]&#10;R1: 6pb en am&#10;R2: 6 aum (12)&#10;&#10;[alitas]&#10;R1: 4pb en am"></textarea>
+        <textarea id="npPattern" class="textarea-standard" rows="5" placeholder="[cabeza]&#10;R1: 6pb en am&#10;R2: 6 aum (12)&#10;&#10;[alitas]&#10;R1: 4pb en am"></textarea>
       </div>
 
-      <div class="modal-actions">
-        <button class="btn-secondary" id="btnNpCancel" data-i18n="btn.cancel">Cancelar</button>
-        <button class="btn-primary" id="btnNpSave" data-i18n="btn.saveProj">Guardar</button>
+      <div class="modal-actions-row">
+        <button class="btn-modal-cancel" id="btnNpCancel" data-i18n="btn.cancel">Cancelar</button>
+        <button class="btn-modal-save" id="btnNpSave" data-i18n="btn.saveProj">Guardar</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: AGREGAR HILO -->
+  <!-- MODAL HILO -->
   <div class="modal-overlay" id="modalNewThread">
     <div class="modal-card">
-      <div class="modal-title-row">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>
-        <h3 data-i18n="modal.threadTitle">Agregar Nuevo Hilo</h3>
+      <h3 class="modal-header-h3" data-i18n="modal.threadTitle">🧶 Agregar Nuevo Hilo</h3>
+      <input type="text" id="thName" class="input-text-standard" placeholder="Nombre (ej Rosa Bebé)..." />
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="thType" class="input-text-standard" placeholder="Tipo (ej Algodón 4 hebras)..." />
+        <input type="number" id="thGrams" class="input-text-standard" placeholder="Gramos (ej 100)..." />
       </div>
-      <div class="form-group">
-        <input type="text" id="thName" class="text-input" placeholder="Nombre (ej Rosa Bebé)..." />
+      <div>
+        <label style="font-size:0.8rem; font-weight:700; color:var(--text-sub);">Color:</label>
+        <input type="color" id="thColor" value="#ff4b81" style="width:100%; height:40px; border:none; border-radius:8px; margin-top:4px;" />
       </div>
-      <div class="form-row">
-        <input type="text" id="thType" class="text-input" placeholder="Tipo (ej Algodón 4 hebras)..." />
-        <input type="number" id="thGrams" class="text-input" placeholder="Gramos (ej 100)..." />
-      </div>
-      <div class="form-group">
-        <label style="font-size: 0.85rem; font-weight: 700; color: var(--text-sub);">Color referencial:</label>
-        <input type="color" id="thColor" value="#f4a8b8" style="width: 100%; height: 42px; border: none; border-radius: 10px; cursor: pointer; margin-top: 4px;" />
-      </div>
-      <div class="modal-actions">
-        <button class="btn-secondary" id="btnThCancel" data-i18n="btn.cancel">Cancelar</button>
-        <button class="btn-primary" id="btnThSave" data-i18n="btn.saveThread">Guardar</button>
+      <div class="modal-actions-row">
+        <button class="btn-modal-cancel" id="btnThCancel" data-i18n="btn.cancel">Cancelar</button>
+        <button class="btn-modal-save" id="btnThSave" data-i18n="btn.saveThread">Guardar</button>
       </div>
     </div>
   </div>
 
-  <!-- TOAST NOTIFICACIÓN -->
   <div class="toast" id="toast"></div>
 
   <script src="./app.js"></script>
