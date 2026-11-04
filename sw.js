@@ -1,7 +1,7 @@
 /* ================================================================
-   LOOPIESTUDIO — sw.js v3 (Service Worker Completo)
+   LOOPIESTUDIO — sw.js v6 (Service Worker Completo)
    ================================================================ */
-const CACHE_NAME = 'loopiestudio-v4';
+const CACHE_NAME = 'loopiestudio-v6';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -36,7 +36,6 @@ self.addEventListener('fetch', (event) => {
     caches.match(event.request).then((cachedResponse) => cachedResponse || fetch(event.request))
   );
 });
-  event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       return cachedResponse || fetch(event.request);
     })
