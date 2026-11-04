@@ -1,5 +1,5 @@
 /* ================================================================
-   LOOPIESTUDIO — app.js v6.0 (Offline Autónomo + Sin Duplicados)
+   LOOPIESTUDIO — app.js v6.5 (Persistencia Local Limpia Sin Duplicados)
    ================================================================ */
 'use strict';
 
@@ -41,7 +41,7 @@ function compressImage(file, maxWidth = 600, quality = 0.7) {
 }
 
 async function fetchConTimeout(resource, options = {}) {
-  const { timeout = 1500 } = options;
+  const { timeout = 1200 } = options;
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
   try {
@@ -287,34 +287,31 @@ dom.glossarySearch.addEventListener('input', () => { const q = dom.glossarySearc
 
 dom.projectTabs.forEach(tab => tab.addEventListener('click', () => { dom.projectTabs.forEach(t => t.classList.toggle('active-tab', t === tab)); document.querySelectorAll('.tab-panel').forEach(p => p.style.display = p.id === `tab-${tab.dataset.tab}` ? 'grid' : 'none'); }));
 
-// CARGA DE PROYECTOS (LOCAL + BACKEND OPCIONAL)
-async function fetchProjectsFromDB() {
-  let serverProjects = [];
-  try {
-    const response = await fetchConTimeout('api.php', { timeout: 1200 });
-    if (response.ok) {
-      const data = await response.json();
-      if (Array.isArray(data)) { 
-        serverProjects = data;
-      }
+// CARGA EXCLUSIVAMENTE DESDE EL CACHÉ LOCAL
+function fetchProjectsFromDB() {
+  // Limpiar cualquier residuo viejo de offline_proj_ si aún existe
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('offline_proj_')) {
+      localStorage.removeItem(key);
+      i--;
     }
-  } catch (error) { 
-    // Entorno GitHub Pages / Offline esperado
   }
 
-  // Leer proyectos guardados en localStorage
-  let savedLocal = [];
+  let saved = [];
   try {
     const cached = localStorage.getItem('loopie_projects_cache');
-    if (cached) savedLocal = JSON.parse(cached);
-  } catch(e) { savedLocal = []; }
+    if (cached) saved = JSON.parse(cached);
+  } catch(e) { saved = []; }
 
-  // Fusionar sin duplicar priorizando los datos más recientes
-  const uniqueMap = new Map();
-  serverProjects.forEach(p => uniqueMap.set(p.id || p.nombre, p));
-  savedLocal.forEach(p => uniqueMap.set(p.id || p.nombre, p));
+  // Asegurar que cada proyecto tenga un ID único para no duplicar
+  const map = new Map();
+  saved.forEach(p => {
+    if (!p.id) p.id = `proj_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+    map.set(p.id, p);
+  });
 
-  localProjects = Array.from(uniqueMap.values());
+  localProjects = Array.from(map.values());
   localStorage.setItem('loopie_projects_cache', JSON.stringify(localProjects));
   renderProjectsGrid();
 }
@@ -326,7 +323,7 @@ function renderProjectsGrid() {
     return; 
   }
   
-  localProjects.forEach((proj, index) => {
+  localProjects.forEach((proj) => {
     const bgStyle = proj.foto ? `background-image: url('${proj.foto}');` : `background: linear-gradient(135deg, #f4a8b8, #ffe8d0);`;
     let tagsHTML = ''; if(proj.tags) { proj.tags.split(',').slice(0, 2).forEach(t => tagsHTML += `<span class="tag tag-pink">${t.trim()}</span>`); }
     
@@ -342,23 +339,21 @@ function renderProjectsGrid() {
       </div>
     `;
     
-    card.querySelector('.delete-proj-btn').addEventListener('click', async (e) => {
+    // ELIMINAR DEFINITIVO
+    card.querySelector('.delete-proj-btn').addEventListener('click', (e) => {
       e.stopPropagation();
       if(confirm(`¿Eliminar "${proj.nombre}"?`)) {
-        localProjects = localProjects.filter(p => p.id !== proj.id && p.nombre !== proj.nombre);
+        localProjects = localProjects.filter(p => p.id !== proj.id);
         localStorage.setItem('loopie_projects_cache', JSON.stringify(localProjects));
         renderProjectsGrid();
-
-        try { 
-          await fetchConTimeout('api.php', { method: 'POST', body: JSON.stringify({ action: 'delete', nombre: proj.nombre }), timeout: 1500 }); 
-        } catch(err) {}
         showToast('🗑️ Proyecto eliminado');
       }
     });
 
+    // EDITAR
     card.querySelector('.edit-proj-btn').addEventListener('click', (e) => {
       e.stopPropagation();
-      dom.npId.value = proj.id || `proj_${Date.now()}`; 
+      dom.npId.value = proj.id; 
       dom.npName.value = proj.nombre || ''; 
       dom.npLevel.value = proj.nivel || ''; 
       dom.npStatus.value = proj.estado || 'todo'; 
@@ -376,6 +371,7 @@ function renderProjectsGrid() {
       dom.modalNewProject.classList.add('open');
     });
 
+    // ABRIR EN ESTACIÓN DE TRABAJO
     card.addEventListener('click', () => {
       dom.wsProjName.textContent = proj.nombre; 
       dom.wsCounterName.textContent = proj.nombre; 
@@ -408,7 +404,7 @@ function renderProjectsGrid() {
             currentPhaseRoundsHTML = '';
           }
           currentPhaseName = sectionMatch[1].toUpperCase();
-          partRoundNumber = 0; // REINICIO DE VUELTAS A R1 EN CADA PIEZA
+          partRoundNumber = 0; // Reinicio en R1 para cada parte
         } else {
           globalRoundCounter++;
           partRoundNumber++;
@@ -501,13 +497,13 @@ dom.btnNewProject.addEventListener('click', () => {
 
 dom.btnNpCancel.addEventListener('click', () => dom.modalNewProject.classList.remove('open'));
 
-// GUARDAR / EDITAR DIRECTO EN LOCAL (SIN DUPLICADOS)
-dom.btnNpSave.addEventListener('click', async () => {
-  const localId = dom.npId.value ? dom.npId.value : `proj_${Date.now()}`;
+// GUARDAR / ACTUALIZAR DIRECTO
+dom.btnNpSave.addEventListener('click', () => {
+  const isEditing = Boolean(dom.npId.value);
+  const targetId = isEditing ? dom.npId.value : `proj_${Date.now()}`;
   
   const data = { 
-    id: localId, 
-    action: dom.npId.value ? 'edit' : 'save', 
+    id: targetId, 
     nombre: dom.npName.value.trim(), 
     nivel: dom.npLevel.value, 
     estado: dom.npStatus.value, 
@@ -521,8 +517,7 @@ dom.btnNpSave.addEventListener('click', async () => {
   if (!data.nombre) return showToast('⚠️ Ingresa el nombre del proyecto');
   dom.modalNewProject.classList.remove('open');
 
-  // Actualizar la lista local sin duplicar
-  const existingIndex = localProjects.findIndex(p => p.id === localId || p.nombre === data.nombre);
+  const existingIndex = localProjects.findIndex(p => p.id === targetId);
   if (existingIndex >= 0) {
     localProjects[existingIndex] = data;
     showToast('✏️ Proyecto actualizado');
@@ -531,16 +526,8 @@ dom.btnNpSave.addEventListener('click', async () => {
     showToast('✅ Proyecto guardado');
   }
 
-  // Guardar inmediatamente en localStorage
   localStorage.setItem('loopie_projects_cache', JSON.stringify(localProjects));
   renderProjectsGrid();
-
-  // Si existe un backend configurado, intentamos sincronizar en segundo plano
-  try { 
-    await fetchConTimeout('api.php', { method: 'POST', body: JSON.stringify(data), timeout: 1200 }); 
-  } catch (error) {
-    // Si no hay api.php (GitHub Pages), no pasa nada: ya está seguro en el teléfono
-  }
 });
 
 dom.btnFormatPattern.addEventListener('click', () => { 
