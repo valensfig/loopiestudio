@@ -1,5 +1,5 @@
 /* ================================================================
-   LOOPIESTUDIO — app.js v6.5 (Persistencia Local Limpia Sin Duplicados)
+   LOOPIESTUDIO — app.js v7.0 (Persistencia de Hilos + Proyectos)
    ================================================================ */
 'use strict';
 
@@ -40,20 +40,6 @@ function compressImage(file, maxWidth = 600, quality = 0.7) {
   });
 }
 
-async function fetchConTimeout(resource, options = {}) {
-  const { timeout = 1200 } = options;
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-  try {
-    const response = await fetch(resource, { ...options, signal: controller.signal });
-    clearTimeout(id);
-    return response;
-  } catch (err) {
-    clearTimeout(id);
-    throw err;
-  }
-}
-
 const I18N = {
   es: { 'nav.work': 'Trabajo', 'nav.projects': 'Proyectos', 'nav.yarns': 'Hilos', 'nav.calc': 'Calculadora', 'nav.glossary': 'Glosario', 'view.projects': 'Proyectos', 'view.materials': 'Mis Hilos', 'view.glossary': 'Glosario', 'lang.es': 'ES', 'lang.en': 'EN', 'palette.label': '✨ Paleta sugerida', 'palette.btn': 'Nueva', 'panel.tutorial': 'Tutorial', 'panel.pattern': 'Patrón', 'btn.addTutorial': 'Agregar tutorial', 'video.hint': 'El video no se puede embeber aquí', 'btn.openApp': 'Abrir video en la App', 'btn.changeLink': 'Cambiar enlace', 'pattern.meta': 'Principiante · DK · Aguja 4.0mm', 'phase.materials': 'Detalles', 'mat.tools': 'Aguja recomendada: X', 'notes.title': '📝 Notas', 'notes.desc': 'Mantén la tensión uniforme.', 'status.wip': 'En progreso', 'counter.current': 'VUELTA ACTUAL', 'counter.stitches': 'PUNTOS', 'counter.note': '📝 Nota para vuelta', 'btn.new': 'Nuevo', 'tab.todo': 'Por hacer', 'tab.wip': 'En proceso', 'tab.redo': 'Volviendo', 'calc.tabTitle': 'Calculadora', 'calc.title': 'Cierre de Proyecto', 'calc.yarnSmart': '🧵 Precio de madeja ÷ Gramos totales', 'calc.yarnUsed': '⚖️ Gramos usados en tu tejido', 'calc.labor': '⏱ Horas × tarifa/hr', 'calc.extras': '📦 Materiales extras', 'calc.price': '🏷️ Precio final de venta', 'calc.total': 'Costo total:', 'calc.profit': 'Ganancia neta:', 'btn.calculate': 'Calcular', 'btn.copyQuote': '📲 WhatsApp', 'btn.add': 'Agregar', 'glossary.search': '🔍 Buscar punto o abreviatura...', 'toast.lang': '🇪🇸 Idioma cambiado a español', 'modal.videoTitle': '🎬 Agregar Tutorial', 'btn.cancel': 'Cancelar', 'btn.load': 'Cargar', 'modal.projTitle': '🌟 Proyecto', 'opt.level': 'Nivel...', 'modal.pastePattern': '📋 Patrón', 'btn.format': 'Formatear', 'btn.saveProj': 'Guardar', 'btn.photo': '📷 Foto', 'modal.threadTitle': '🧶 Agregar Nuevo Hilo', 'btn.saveThread': 'Guardar' },
   en: { 'nav.work': 'Workspace', 'nav.projects': 'Projects', 'nav.yarns': 'Yarns', 'nav.calc': 'Calculator', 'nav.glossary': 'Glossary', 'view.projects': 'Projects', 'view.materials': 'My Yarns', 'view.glossary': 'Glossary', 'lang.es': 'ES', 'lang.en': 'EN', 'palette.label': '✨ Suggested Palette', 'palette.btn': 'Refresh', 'panel.tutorial': 'Tutorial', 'panel.pattern': 'Pattern', 'btn.addTutorial': 'Add tutorial', 'video.hint': 'Video cannot be embedded here', 'btn.openApp': 'Open video in App', 'btn.changeLink': 'Change link', 'pattern.meta': 'Beginner · DK · 4.0mm Hook', 'phase.materials': 'Details', 'mat.tools': 'Recommended hook: X', 'notes.title': '📝 Notes', 'notes.desc': 'Keep your tension even.', 'status.wip': 'In progress', 'counter.current': 'CURRENT ROUND', 'counter.stitches': 'STITCHES', 'counter.note': '📝 Note for round', 'btn.new': 'New', 'tab.todo': 'To do', 'tab.wip': 'In progress', 'tab.redo': 'Redo', 'calc.tabTitle': 'Calculator', 'calc.title': 'Project Wrap-up', 'calc.yarnSmart': '🧵 Skein price ÷ Total grams', 'calc.yarnUsed': '⚖️ Grams used in project', 'calc.labor': '⏱ Hours × rate/hr', 'calc.extras': '📦 Extra materials', 'calc.price': '🏷️ Final sale price', 'calc.total': 'Total cost:', 'calc.profit': 'Net profit:', 'btn.calculate': 'Calculate', 'btn.copyQuote': '📲 WhatsApp', 'btn.add': 'Add', 'glossary.search': '🔍 Search stitch or abbreviation...', 'toast.lang': '🇺🇸 Language changed to English', 'modal.videoTitle': '🎬 Add Tutorial', 'btn.cancel': 'Cancel', 'btn.load': 'Load', 'modal.projTitle': '🌟 Project', 'opt.level': 'Level...', 'modal.pastePattern': '📋 Pattern', 'btn.format': 'Format', 'btn.saveProj': 'Save', 'btn.photo': '📷 Photo', 'modal.threadTitle': '🧶 Add New Yarn', 'btn.saveThread': 'Save' }
@@ -73,6 +59,7 @@ function applyLanguage() {
 const PALETTES = [['#f4a8b8', '#fff3c4', '#d4b5d8'], ['#ffd6e0', '#fff9cc', '#c8e6c9'], ['#ffb3c6', '#ffe5a0', '#b8d4f0'], ['#f9c6d0', '#ffeaa8', '#c9e0bc'], ['#f7a8c4', '#fff0b0', '#a8d8ea'], ['#fdb8d0', '#fef3be', '#b8d8d8']];
 let currentPaletteIdx = 0;
 let localProjects = []; 
+let localThreads = [];
 
 const state = {
   currentView: 'viewWorkstation', currentRound: 1, totalRounds: 1, stitchCount: 0,
@@ -108,6 +95,7 @@ function navigateTo(viewId) {
   state.currentView = viewId;
   dom.navItems.forEach(item => item.classList.toggle('active-nav', item.dataset.view === viewId));
   if (viewId === 'viewGlossary') renderGlossary(state.lang === 'en' ? GLOSSARY_EN : GLOSSARY);
+  if (viewId === 'viewMaterials') renderMaterialsList();
   if (viewId === 'viewWorkstation') requestWakeLock(); else releaseWakeLock();
 }
 
@@ -267,7 +255,7 @@ dom.btnTranslate.addEventListener('click', () => {
     isTranslated = false; 
     showToast('🔤 Patrón restaurado'); 
     highlightActiveRound(state.currentRound); 
-  }
+  } 
 });
 
 dom.btnCalc.addEventListener('click', () => {
@@ -287,9 +275,8 @@ dom.glossarySearch.addEventListener('input', () => { const q = dom.glossarySearc
 
 dom.projectTabs.forEach(tab => tab.addEventListener('click', () => { dom.projectTabs.forEach(t => t.classList.toggle('active-tab', t === tab)); document.querySelectorAll('.tab-panel').forEach(p => p.style.display = p.id === `tab-${tab.dataset.tab}` ? 'grid' : 'none'); }));
 
-// CARGA EXCLUSIVAMENTE DESDE EL CACHÉ LOCAL
+// CARGA EXCLUSIVAMENTE DESDE EL CACHÉ LOCAL (PROYECTOS)
 function fetchProjectsFromDB() {
-  // Limpiar cualquier residuo viejo de offline_proj_ si aún existe
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (key && key.startsWith('offline_proj_')) {
@@ -304,7 +291,6 @@ function fetchProjectsFromDB() {
     if (cached) saved = JSON.parse(cached);
   } catch(e) { saved = []; }
 
-  // Asegurar que cada proyecto tenga un ID único para no duplicar
   const map = new Map();
   saved.forEach(p => {
     if (!p.id) p.id = `proj_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
@@ -339,7 +325,6 @@ function renderProjectsGrid() {
       </div>
     `;
     
-    // ELIMINAR DEFINITIVO
     card.querySelector('.delete-proj-btn').addEventListener('click', (e) => {
       e.stopPropagation();
       if(confirm(`¿Eliminar "${proj.nombre}"?`)) {
@@ -350,7 +335,6 @@ function renderProjectsGrid() {
       }
     });
 
-    // EDITAR
     card.querySelector('.edit-proj-btn').addEventListener('click', (e) => {
       e.stopPropagation();
       dom.npId.value = proj.id; 
@@ -371,7 +355,6 @@ function renderProjectsGrid() {
       dom.modalNewProject.classList.add('open');
     });
 
-    // ABRIR EN ESTACIÓN DE TRABAJO
     card.addEventListener('click', () => {
       dom.wsProjName.textContent = proj.nombre; 
       dom.wsCounterName.textContent = proj.nombre; 
@@ -404,7 +387,7 @@ function renderProjectsGrid() {
             currentPhaseRoundsHTML = '';
           }
           currentPhaseName = sectionMatch[1].toUpperCase();
-          partRoundNumber = 0; // Reinicio en R1 para cada parte
+          partRoundNumber = 0;
         } else {
           globalRoundCounter++;
           partRoundNumber++;
@@ -497,7 +480,6 @@ dom.btnNewProject.addEventListener('click', () => {
 
 dom.btnNpCancel.addEventListener('click', () => dom.modalNewProject.classList.remove('open'));
 
-// GUARDAR / ACTUALIZAR DIRECTO
 dom.btnNpSave.addEventListener('click', () => {
   const isEditing = Boolean(dom.npId.value);
   const targetId = isEditing ? dom.npId.value : `proj_${Date.now()}`;
@@ -536,15 +518,107 @@ dom.btnFormatPattern.addEventListener('click', () => {
   showToast('✨ Patrón formateado'); 
 });
 
+// ================= GESTIÓN DE HILOS (PERSISTENCIA LOCAL) =================
+function loadThreads() {
+  try {
+    const cached = localStorage.getItem('loopie_threads_cache');
+    localThreads = cached ? JSON.parse(cached) : [];
+  } catch (e) {
+    localThreads = [];
+  }
+  renderMaterialsList();
+}
+
+function saveThreads() {
+  localStorage.setItem('loopie_threads_cache', JSON.stringify(localThreads));
+}
+
+function renderMaterialsList() {
+  dom.materialsList.innerHTML = '';
+  if (localThreads.length === 0) {
+    dom.materialsList.innerHTML = `<div class="empty-state"><span class="empty-icon">🧶</span><p>No tienes hilos registrados todavía.</p></div>`;
+    return;
+  }
+
+  localThreads.forEach((th, idx) => {
+    const item = document.createElement('div');
+    item.className = 'material-item';
+    item.innerHTML = `
+      <div class="material-swatch" style="background:${th.color}"></div>
+      <div class="material-info">
+        <span class="material-name">${th.name}</span>
+        <span class="material-meta">${th.type} · ${th.grams}g</span>
+      </div>
+      <div class="material-qty-control">
+        <button class="mat-btn btn-minus-g" data-idx="${idx}">-</button>
+        <span class="material-qty">${th.grams}g</span>
+        <button class="mat-btn btn-plus-g" data-idx="${idx}">+</button>
+      </div>
+      <button class="delete-proj-btn" style="position:static; margin-left:6px; background:rgba(220,50,50,0.15); color:var(--rose-500);" title="Eliminar hilo" data-del="${idx}">🗑️</button>
+    `;
+
+    // Reducir gramos
+    item.querySelector('.btn-minus-g').addEventListener('click', (e) => {
+      e.stopPropagation();
+      const i = parseInt(e.target.dataset.idx, 10);
+      localThreads[i].grams = Math.max(0, localThreads[i].grams - 10);
+      saveThreads();
+      renderMaterialsList();
+    });
+
+    // Aumentar gramos
+    item.querySelector('.btn-plus-g').addEventListener('click', (e) => {
+      e.stopPropagation();
+      const i = parseInt(e.target.dataset.idx, 10);
+      localThreads[i].grams += 10;
+      saveThreads();
+      renderMaterialsList();
+    });
+
+    // Eliminar hilo
+    item.querySelector('[data-del]').addEventListener('click', (e) => {
+      e.stopPropagation();
+      const i = parseInt(e.currentTarget.dataset.del, 10);
+      if (confirm(`¿Eliminar hilo "${localThreads[i].name}"?`)) {
+        localThreads.splice(i, 1);
+        saveThreads();
+        renderMaterialsList();
+        showToast('🗑️ Hilo eliminado');
+      }
+    });
+
+    dom.materialsList.appendChild(item);
+  });
+}
+
 dom.btnAddThread.addEventListener('click', () => { dom.modalNewThread.classList.add('open'); setTimeout(() => dom.thName.focus(), 320); });
 dom.btnThCancel.addEventListener('click', () => dom.modalNewThread.classList.remove('open'));
+
 dom.btnThSave.addEventListener('click', () => {
-  const name = dom.thName.value.trim(); const type = dom.thType.value.trim() || 'Algodón'; const grams = dom.thGrams.value.trim() || '100'; const color = dom.thColor.value;
+  const name = dom.thName.value.trim(); 
+  const type = dom.thType.value.trim() || 'Algodón'; 
+  const grams = parseInt(dom.thGrams.value.trim(), 10) || 100; 
+  const color = dom.thColor.value || '#f4a8b8';
+  
   if (!name) return showToast('⚠️ Ingresa el nombre del hilo');
-  const nuevoHilo = document.createElement('div'); nuevoHilo.className = 'material-item';
-  nuevoHilo.innerHTML = `<div class="material-swatch" style="background:${color}"></div><div class="material-info"><span class="material-name">${name}</span><span class="material-meta">${type} · ${grams}g</span></div><div class="material-qty-control"><button class="mat-btn" onclick="this.nextElementSibling.textContent = Math.max(0, parseInt(this.nextElementSibling.textContent)-10) + 'g'">-</button><span class="material-qty">${grams}g</span><button class="mat-btn" onclick="this.previousElementSibling.textContent = parseInt(this.previousElementSibling.textContent)+10 + 'g'">+</button></div>`;
-  dom.materialsList.insertBefore(nuevoHilo, dom.materialsList.firstChild);
-  dom.modalNewThread.classList.remove('open'); dom.thName.value = ''; dom.thType.value = ''; dom.thGrams.value = ''; showToast('🧶 Hilo guardado');
+
+  const nuevoHilo = {
+    id: `th_${Date.now()}`,
+    name,
+    type,
+    grams,
+    color
+  };
+
+  localThreads.unshift(nuevoHilo);
+  saveThreads();
+  renderMaterialsList();
+
+  dom.modalNewThread.classList.remove('open'); 
+  dom.thName.value = ''; 
+  dom.thType.value = ''; 
+  dom.thGrams.value = ''; 
+  showToast('🧶 Hilo guardado');
 });
 
 function rippleEffect(e, btn) { const r = btn.getBoundingClientRect(), x = (e.touches?.[0].clientX||e.clientX)-r.left, y = (e.touches?.[0].clientY||e.clientY)-r.top; const w = document.createElement('span'); w.className = 'ripple-wave'; w.style.left=`${x}px`; w.style.top=`${y}px`; btn.appendChild(w); setTimeout(() => w.remove(), 600); }
@@ -554,6 +628,8 @@ let toastTimeout; function showToast(msg) { clearTimeout(toastTimeout); dom.toas
 function initApp() {
   document.querySelectorAll('.round-instructions').forEach(el => el.innerHTML = parseMarkdown(el.innerHTML));
   fetchProjectsFromDB(); 
+  loadThreads(); // Cargar hilos almacenados
+
   const saved = JSON.parse(localStorage.getItem('loopie_progress'));
   if(saved) { state.currentRound = saved.round || 1; state.stitchCount = saved.stitches || 0; state.timerSeconds = saved.timer || 0; state.quickNotes = saved.notes || {}; dom.stitchCount.textContent = state.stitchCount; dom.timerDisplay.textContent = formatTimer(state.timerSeconds); }
   updateCounterUI(); if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) dom.btnTheme.click(); applyPalette(0); requestWakeLock();
