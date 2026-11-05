@@ -641,3 +641,60 @@ function initApp() {
   }
 }
 initApp();
+
+/* ================================================================
+   SINCRONIZACIÓN AUTOMÁTICA EN LA NUBE (SUPABASE)
+   ================================================================ */
+const SUPABASE_URL = "https://chcibhcimssujjztjauf.supabase.co";
+const SUPABASE_KEY = "sb_publishable_otPmY-v8_OlPF9MXUzd3GA_Vlruj3i7";
+
+async function syncProjectsToCloud() {
+  if (!navigator.onLine) return;
+
+  try {
+    const rawData = localStorage.getItem('loopie_projects');
+    if (!rawData) return;
+    const localProjects = JSON.parse(rawData);
+    if (!Array.isArray(localProjects) || localProjects.length === 0) return;
+
+    // Normalizar datos para la tabla de Supabase
+    const payload = localProjects.map(p => ({
+      id: String(p.id),
+      name: p.name || 'Sin nombre',
+      status: p.status || 'todo',
+      level: p.level || '',
+      tags: Array.isArray(p.tags) ? p.tags.join(', ') : (p.tags || ''),
+      hook: p.hook || '',
+      video: p.video || '',
+      pattern: typeof p.pattern === 'string' ? p.pattern : JSON.stringify(p.pattern || ''),
+      image: p.photo || p.image || '',
+      timer_seconds: Number(p.timer_seconds) || 0,
+      updated_at: new Date().toISOString()
+    }));
+
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/projects`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (response.ok) {
+      console.log("☁️ Proyectos sincronizados en la nube exitosamente.");
+    }
+  } catch (err) {
+    console.warn("Sincronización en segundo plano pendiente:", err);
+  }
+}
+
+// Sincronizar automáticamente al recuperar conexión a internet
+window.addEventListener('online', syncProjectsToCloud);
+
+// Sincronizar al iniciar la aplicación si hay conexión
+if (navigator.onLine) {
+  syncProjectsToCloud();
+}
