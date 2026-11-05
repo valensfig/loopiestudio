@@ -1,5 +1,5 @@
 /* ================================================================
-   LOOPIESTUDIO — app.js v7.1 (Persistencia Local + Nube Supabase)
+   LOOPIESTUDIO — app.js v7.2 (Cronómetro por Proyecto + Supabase)
    ================================================================ */
 'use strict';
 
@@ -64,14 +64,24 @@ let localThreads = [];
 const state = {
   currentView: 'viewWorkstation', currentRound: 1, totalRounds: 1, stitchCount: 0,
   videoLoaded: false, quickNotes: {}, isDarkMode: false, paletteOpen: false, lang: 'es',
-  timerSeconds: 0, isTimerRunning: false, timerInterval: null
+  timerSeconds: 0, isTimerRunning: false, timerInterval: null,
+  activeProjectId: null // Rastrea el ID del proyecto abierto en Workstation
 };
 
 let wakeLock = null;
 async function requestWakeLock() { if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} } }
 function releaseWakeLock() { if (wakeLock !== null) { wakeLock.release(); wakeLock = null; } }
 document.addEventListener('visibilitychange', () => { if (wakeLock !== null && document.visibilityState === 'visible') requestWakeLock(); });
-function saveLocalProgress() { localStorage.setItem('loopie_progress', JSON.stringify({ round: state.currentRound, stitches: state.stitchCount, timer: state.timerSeconds, notes: state.quickNotes })); }
+
+function saveLocalProgress() { 
+  localStorage.setItem('loopie_progress', JSON.stringify({ 
+    round: state.currentRound, 
+    stitches: state.stitchCount, 
+    timer: state.timerSeconds, 
+    notes: state.quickNotes,
+    activeProjectId: state.activeProjectId 
+  })); 
+}
 
 const $ = id => document.getElementById(id);
 const dom = {
@@ -214,6 +224,7 @@ dom.btnStitchMinus.addEventListener('click', () => { if (state.stitchCount > 0) 
 dom.quickNoteInput.addEventListener('input', () => { state.quickNotes[state.currentRound] = dom.quickNoteInput.value; saveLocalProgress(); });
 
 function formatTimer(sec) { const h = Math.floor(sec / 3600).toString().padStart(2, '0'), m = Math.floor((sec % 3600) / 60).toString().padStart(2, '0'), s = (sec % 60).toString().padStart(2, '0'); return `${h}:${m}:${s}`; }
+
 dom.btnTimerToggle.addEventListener('click', () => { 
   state.isTimerRunning = !state.isTimerRunning; 
   if (state.isTimerRunning) { 
@@ -222,6 +233,16 @@ dom.btnTimerToggle.addEventListener('click', () => {
       state.timerSeconds++; 
       dom.timerDisplay.textContent = formatTimer(state.timerSeconds); 
       saveLocalProgress(); 
+      
+      // Persistir segundos dentro del proyecto abierto
+      if (state.activeProjectId) {
+        const activeProj = localProjects.find(p => p.id === state.activeProjectId);
+        if (activeProj) {
+          activeProj.timer_seconds = state.timerSeconds;
+          localStorage.setItem('loopie_projects_cache', JSON.stringify(localProjects));
+        }
+      }
+
       if (dom.calcHours) { 
         dom.calcHours.value = (state.timerSeconds / 3600).toFixed(2); 
         dom.btnCalc.click(); 
@@ -230,6 +251,8 @@ dom.btnTimerToggle.addEventListener('click', () => {
   } else { 
     dom.btnTimerToggle.textContent = '▶️'; 
     clearInterval(state.timerInterval); 
+    // Al pausar, sincronizar el tiempo acumulado con la nube
+    syncProjectsToCloud();
   } 
 });
 
@@ -294,6 +317,7 @@ function fetchProjectsFromDB() {
   const map = new Map();
   saved.forEach(p => {
     if (!p.id) p.id = `proj_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+    if (p.timer_seconds === undefined) p.timer_seconds = 0;
     map.set(p.id, p);
   });
 
@@ -331,7 +355,7 @@ function renderProjectsGrid() {
         localProjects = localProjects.filter(p => p.id !== proj.id);
         localStorage.setItem('loopie_projects_cache', JSON.stringify(localProjects));
         renderProjectsGrid();
-        syncProjectsToCloud(); // Respaldo tras borrar
+        syncProjectsToCloud();
         showToast('🗑️ Proyecto eliminado');
       }
     });
@@ -357,6 +381,21 @@ function renderProjectsGrid() {
     });
 
     card.addEventListener('click', () => {
+      // Detener cualquier cronómetro previo si estaba corriendo
+      if (state.isTimerRunning) {
+        clearInterval(state.timerInterval);
+        state.isTimerRunning = false;
+        dom.btnTimerToggle.textContent = '▶️';
+      }
+
+      state.activeProjectId = proj.id;
+      state.timerSeconds = Number(proj.timer_seconds) || 0;
+      dom.timerDisplay.textContent = formatTimer(state.timerSeconds);
+      if (dom.calcHours) {
+        dom.calcHours.value = (state.timerSeconds / 3600).toFixed(2);
+        dom.btnCalc.click();
+      }
+
       dom.wsProjName.textContent = proj.nombre; 
       dom.wsCounterName.textContent = proj.nombre; 
       dom.wsProjMeta.textContent = `${proj.nivel || ''} · Aguja ${proj.hook || 'No definida'}`; 
@@ -442,8 +481,8 @@ function renderProjectsGrid() {
       state.totalRounds = Math.max(1, globalRoundCounter); 
       state.currentRound = 1; 
       state.stitchCount = 0; 
-      state.timerSeconds = 0; 
       updateCounterUI(); 
+      saveLocalProgress();
       navigateTo('viewWorkstation'); 
       showToast('🧶 Proyecto cargado');
     });
@@ -484,6 +523,7 @@ dom.btnNpCancel.addEventListener('click', () => dom.modalNewProject.classList.re
 dom.btnNpSave.addEventListener('click', () => {
   const isEditing = Boolean(dom.npId.value);
   const targetId = isEditing ? dom.npId.value : `proj_${Date.now()}`;
+  const existingProj = localProjects.find(p => p.id === targetId);
   
   const data = { 
     id: targetId, 
@@ -494,7 +534,8 @@ dom.btnNpSave.addEventListener('click', () => {
     hook: dom.npHook.value, 
     video_url: dom.npVideo.value.trim(), 
     patron_texto: dom.npPattern.value, 
-    foto: currentProjPhotoBase64 
+    foto: currentProjPhotoBase64,
+    timer_seconds: existingProj ? existingProj.timer_seconds : 0
   };
   
   if (!data.nombre) return showToast('⚠️ Ingresa el nombre del proyecto');
@@ -511,7 +552,7 @@ dom.btnNpSave.addEventListener('click', () => {
 
   localStorage.setItem('loopie_projects_cache', JSON.stringify(localProjects));
   renderProjectsGrid();
-  syncProjectsToCloud(); // Sincronización automática con Supabase
+  syncProjectsToCloud();
 });
 
 dom.btnFormatPattern.addEventListener('click', () => { 
@@ -533,7 +574,7 @@ function loadThreads() {
 
 function saveThreads() {
   localStorage.setItem('loopie_threads_cache', JSON.stringify(localThreads));
-  syncThreadsToCloud(); // Sincronización automática de hilos con Supabase
+  syncThreadsToCloud();
 }
 
 function renderMaterialsList() {
@@ -631,8 +672,19 @@ function initApp() {
   loadThreads();
 
   const saved = JSON.parse(localStorage.getItem('loopie_progress'));
-  if(saved) { state.currentRound = saved.round || 1; state.stitchCount = saved.stitches || 0; state.timerSeconds = saved.timer || 0; state.quickNotes = saved.notes || {}; dom.stitchCount.textContent = state.stitchCount; dom.timerDisplay.textContent = formatTimer(state.timerSeconds); }
-  updateCounterUI(); if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) dom.btnTheme.click(); applyPalette(0); requestWakeLock();
+  if(saved) { 
+    state.currentRound = saved.round || 1; 
+    state.stitchCount = saved.stitches || 0; 
+    state.timerSeconds = saved.timer || 0; 
+    state.quickNotes = saved.notes || {}; 
+    state.activeProjectId = saved.activeProjectId || null;
+    dom.stitchCount.textContent = state.stitchCount; 
+    dom.timerDisplay.textContent = formatTimer(state.timerSeconds); 
+  }
+  updateCounterUI(); 
+  if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) dom.btnTheme.click(); 
+  applyPalette(0); 
+  requestWakeLock();
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js')
@@ -668,7 +720,7 @@ async function syncProjectsToCloud() {
       video: p.video_url || '',
       pattern: p.patron_texto || '',
       image: p.foto || '',
-      timer_seconds: 0,
+      timer_seconds: Number(p.timer_seconds) || 0,
       updated_at: new Date().toISOString()
     }));
 
