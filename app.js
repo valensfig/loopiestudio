@@ -1,5 +1,5 @@
 /* ================================================================
-   LOOPIESTUDIO — app.js v7.2 (Cronómetro por Proyecto + Supabase)
+   LOOPIESTUDIO — app.js v7.3 (Cronómetro Aislado por Proyecto + Supabase)
    ================================================================ */
 'use strict';
 
@@ -65,7 +65,7 @@ const state = {
   currentView: 'viewWorkstation', currentRound: 1, totalRounds: 1, stitchCount: 0,
   videoLoaded: false, quickNotes: {}, isDarkMode: false, paletteOpen: false, lang: 'es',
   timerSeconds: 0, isTimerRunning: false, timerInterval: null,
-  activeProjectId: null // Rastrea el ID del proyecto abierto en Workstation
+  activeProjectId: null
 };
 
 let wakeLock = null;
@@ -73,14 +73,17 @@ async function requestWakeLock() { if ('wakeLock' in navigator) { try { wakeLock
 function releaseWakeLock() { if (wakeLock !== null) { wakeLock.release(); wakeLock = null; } }
 document.addEventListener('visibilitychange', () => { if (wakeLock !== null && document.visibilityState === 'visible') requestWakeLock(); });
 
+// Guarda el progreso indexado al proyecto que se está tejiendo
 function saveLocalProgress() { 
-  localStorage.setItem('loopie_progress', JSON.stringify({ 
+  if (!state.activeProjectId) return;
+  const projectProgressKey = `loopie_progress_${state.activeProjectId}`;
+  localStorage.setItem(projectProgressKey, JSON.stringify({ 
     round: state.currentRound, 
     stitches: state.stitchCount, 
     timer: state.timerSeconds, 
-    notes: state.quickNotes,
-    activeProjectId: state.activeProjectId 
+    notes: state.quickNotes 
   })); 
+  localStorage.setItem('loopie_last_active_proj', state.activeProjectId);
 }
 
 const $ = id => document.getElementById(id);
@@ -209,13 +212,25 @@ dom.btnMinus.addEventListener('click', e => {
 });
 
 dom.btnReset.addEventListener('click', () => { 
-  if (confirm('¿Reiniciar el contador?')) { 
+  if (confirm('¿Reiniciar el contador de este proyecto?')) { 
     state.currentRound = 1; 
     state.stitchCount = 0; 
+    state.timerSeconds = 0;
     state.quickNotes = {}; 
     dom.stitchCount.textContent = '0'; 
+    dom.timerDisplay.textContent = formatTimer(0);
+    
+    if (state.activeProjectId) {
+      const activeProj = localProjects.find(p => p.id === state.activeProjectId);
+      if (activeProj) {
+        activeProj.timer_seconds = 0;
+        localStorage.setItem('loopie_projects_cache', JSON.stringify(localProjects));
+      }
+    }
+    
     updateCounterUI(); 
     saveLocalProgress(); 
+    syncProjectsToCloud();
   } 
 });
 
@@ -234,7 +249,6 @@ dom.btnTimerToggle.addEventListener('click', () => {
       dom.timerDisplay.textContent = formatTimer(state.timerSeconds); 
       saveLocalProgress(); 
       
-      // Persistir segundos dentro del proyecto abierto
       if (state.activeProjectId) {
         const activeProj = localProjects.find(p => p.id === state.activeProjectId);
         if (activeProj) {
@@ -251,8 +265,8 @@ dom.btnTimerToggle.addEventListener('click', () => {
   } else { 
     dom.btnTimerToggle.textContent = '▶️'; 
     clearInterval(state.timerInterval); 
-    // Al pausar, sincronizar el tiempo acumulado con la nube
-    syncProjectsToCloud();
+    saveLocalProgress();
+    syncProjectsToCloud(); // Sincroniza los segundos acumulados al pausar
   } 
 });
 
@@ -353,6 +367,7 @@ function renderProjectsGrid() {
       e.stopPropagation();
       if(confirm(`¿Eliminar "${proj.nombre}"?`)) {
         localProjects = localProjects.filter(p => p.id !== proj.id);
+        localStorage.removeItem(`loopie_progress_${proj.id}`);
         localStorage.setItem('loopie_projects_cache', JSON.stringify(localProjects));
         renderProjectsGrid();
         syncProjectsToCloud();
@@ -381,16 +396,25 @@ function renderProjectsGrid() {
     });
 
     card.addEventListener('click', () => {
-      // Detener cualquier cronómetro previo si estaba corriendo
+      // 1. Detener cronómetro si venía corriendo
       if (state.isTimerRunning) {
         clearInterval(state.timerInterval);
         state.isTimerRunning = false;
         dom.btnTimerToggle.textContent = '▶️';
       }
 
+      // 2. Establecer el proyecto activo actual
       state.activeProjectId = proj.id;
-      state.timerSeconds = Number(proj.timer_seconds) || 0;
+
+      // 3. Cargar el progreso aislado propio de este proyecto
+      const savedProg = JSON.parse(localStorage.getItem(`loopie_progress_${proj.id}`)) || {};
+      state.timerSeconds = savedProg.timer !== undefined ? Number(savedProg.timer) : (Number(proj.timer_seconds) || 0);
+      state.currentRound = savedProg.round || 1;
+      state.stitchCount = savedProg.stitches || 0;
+      state.quickNotes = savedProg.notes || {};
+
       dom.timerDisplay.textContent = formatTimer(state.timerSeconds);
+      dom.stitchCount.textContent = state.stitchCount;
       if (dom.calcHours) {
         dom.calcHours.value = (state.timerSeconds / 3600).toFixed(2);
         dom.btnCalc.click();
@@ -479,8 +503,6 @@ function renderProjectsGrid() {
       if(proj.video_url) { loadVideo(proj.video_url); }
       
       state.totalRounds = Math.max(1, globalRoundCounter); 
-      state.currentRound = 1; 
-      state.stitchCount = 0; 
       updateCounterUI(); 
       saveLocalProgress();
       navigateTo('viewWorkstation'); 
@@ -535,7 +557,7 @@ dom.btnNpSave.addEventListener('click', () => {
     video_url: dom.npVideo.value.trim(), 
     patron_texto: dom.npPattern.value, 
     foto: currentProjPhotoBase64,
-    timer_seconds: existingProj ? existingProj.timer_seconds : 0
+    timer_seconds: existingProj ? (existingProj.timer_seconds || 0) : 0
   };
   
   if (!data.nombre) return showToast('⚠️ Ingresa el nombre del proyecto');
@@ -671,16 +693,21 @@ function initApp() {
   fetchProjectsFromDB(); 
   loadThreads();
 
-  const saved = JSON.parse(localStorage.getItem('loopie_progress'));
-  if(saved) { 
-    state.currentRound = saved.round || 1; 
-    state.stitchCount = saved.stitches || 0; 
-    state.timerSeconds = saved.timer || 0; 
-    state.quickNotes = saved.notes || {}; 
-    state.activeProjectId = saved.activeProjectId || null;
-    dom.stitchCount.textContent = state.stitchCount; 
-    dom.timerDisplay.textContent = formatTimer(state.timerSeconds); 
+  // Restaurar el último proyecto activo
+  const lastActiveId = localStorage.getItem('loopie_last_active_proj');
+  if (lastActiveId) {
+    const savedProg = JSON.parse(localStorage.getItem(`loopie_progress_${lastActiveId}`));
+    if (savedProg) {
+      state.activeProjectId = lastActiveId;
+      state.currentRound = savedProg.round || 1;
+      state.stitchCount = savedProg.stitches || 0;
+      state.timerSeconds = savedProg.timer || 0;
+      state.quickNotes = savedProg.notes || {};
+      dom.stitchCount.textContent = state.stitchCount;
+      dom.timerDisplay.textContent = formatTimer(state.timerSeconds);
+    }
   }
+
   updateCounterUI(); 
   if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) dom.btnTheme.click(); 
   applyPalette(0); 
