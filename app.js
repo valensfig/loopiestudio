@@ -1,5 +1,5 @@
 /* ================================================================
-   LOOPIESTUDIO — app.js v7.0 (Persistencia de Hilos + Proyectos)
+   LOOPIESTUDIO — app.js v7.1 (Persistencia Local + Nube Supabase)
    ================================================================ */
 'use strict';
 
@@ -168,8 +168,8 @@ function highlightActiveRound(round) {
         document.querySelector(`[data-target="${phase.id}"]`)?.classList.remove('collapsed'); 
       } 
       setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150); 
-    } else if (r < round) {
-      el.classList.add('completed-round');
+    } else if (r < round) { 
+      el.classList.add('completed-round'); 
     }
   });
 }
@@ -331,6 +331,7 @@ function renderProjectsGrid() {
         localProjects = localProjects.filter(p => p.id !== proj.id);
         localStorage.setItem('loopie_projects_cache', JSON.stringify(localProjects));
         renderProjectsGrid();
+        syncProjectsToCloud(); // Respaldo tras borrar
         showToast('🗑️ Proyecto eliminado');
       }
     });
@@ -352,14 +353,14 @@ function renderProjectsGrid() {
       } else { 
         dom.npPhotoPreview.style.display = 'none'; 
       }
-      dom.modalNewProject.classList.add('open');
+      dom.modalNewProject.classList.add('open'); 
     });
 
     card.addEventListener('click', () => {
       dom.wsProjName.textContent = proj.nombre; 
       dom.wsCounterName.textContent = proj.nombre; 
       dom.wsProjMeta.textContent = `${proj.nivel || ''} · Aguja ${proj.hook || 'No definida'}`; 
-      dom.wsProjTags.innerHTML = `<li><span>Aguja recomendada: ${proj.hook || 'X'}</span></li>`;
+      dom.wsProjTags.innerHTML = `<li><span>Aguja recomendada: ${proj.hook || 'X'}</span></li>`; 
       
       const lines = (proj.patron_texto || '').split('\n').filter(l => l.trim() !== '');
       let globalRoundCounter = 0;
@@ -510,6 +511,7 @@ dom.btnNpSave.addEventListener('click', () => {
 
   localStorage.setItem('loopie_projects_cache', JSON.stringify(localProjects));
   renderProjectsGrid();
+  syncProjectsToCloud(); // Sincronización automática con Supabase
 });
 
 dom.btnFormatPattern.addEventListener('click', () => { 
@@ -531,6 +533,7 @@ function loadThreads() {
 
 function saveThreads() {
   localStorage.setItem('loopie_threads_cache', JSON.stringify(localThreads));
+  syncThreadsToCloud(); // Sincronización automática de hilos con Supabase
 }
 
 function renderMaterialsList() {
@@ -557,7 +560,6 @@ function renderMaterialsList() {
       <button class="delete-proj-btn" style="position:static; margin-left:6px; background:rgba(220,50,50,0.15); color:var(--rose-500);" title="Eliminar hilo" data-del="${idx}">🗑️</button>
     `;
 
-    // Reducir gramos
     item.querySelector('.btn-minus-g').addEventListener('click', (e) => {
       e.stopPropagation();
       const i = parseInt(e.target.dataset.idx, 10);
@@ -566,7 +568,6 @@ function renderMaterialsList() {
       renderMaterialsList();
     });
 
-    // Aumentar gramos
     item.querySelector('.btn-plus-g').addEventListener('click', (e) => {
       e.stopPropagation();
       const i = parseInt(e.target.dataset.idx, 10);
@@ -575,7 +576,6 @@ function renderMaterialsList() {
       renderMaterialsList();
     });
 
-    // Eliminar hilo
     item.querySelector('[data-del]').addEventListener('click', (e) => {
       e.stopPropagation();
       const i = parseInt(e.currentTarget.dataset.del, 10);
@@ -598,7 +598,7 @@ dom.btnThSave.addEventListener('click', () => {
   const name = dom.thName.value.trim(); 
   const type = dom.thType.value.trim() || 'Algodón'; 
   const grams = parseInt(dom.thGrams.value.trim(), 10) || 100; 
-  const color = dom.thColor.value || '#f4a8b8';
+  const color = dom.thColor.value || '#f4a8b8'; 
   
   if (!name) return showToast('⚠️ Ingresa el nombre del hilo');
 
@@ -628,7 +628,7 @@ let toastTimeout; function showToast(msg) { clearTimeout(toastTimeout); dom.toas
 function initApp() {
   document.querySelectorAll('.round-instructions').forEach(el => el.innerHTML = parseMarkdown(el.innerHTML));
   fetchProjectsFromDB(); 
-  loadThreads(); // Cargar hilos almacenados
+  loadThreads();
 
   const saved = JSON.parse(localStorage.getItem('loopie_progress'));
   if(saved) { state.currentRound = saved.round || 1; state.stitchCount = saved.stitches || 0; state.timerSeconds = saved.timer || 0; state.quickNotes = saved.notes || {}; dom.stitchCount.textContent = state.stitchCount; dom.timerDisplay.textContent = formatTimer(state.timerSeconds); }
@@ -648,27 +648,27 @@ initApp();
 const SUPABASE_URL = "https://chcibhcimssujjztjauf.supabase.co";
 const SUPABASE_KEY = "sb_publishable_otPmY-v8_OlPF9MXUzd3GA_Vlruj3i7";
 
+// Sincronizar Proyectos
 async function syncProjectsToCloud() {
   if (!navigator.onLine) return;
 
   try {
-    const rawData = localStorage.getItem('loopie_projects');
+    const rawData = localStorage.getItem('loopie_projects_cache');
     if (!rawData) return;
-    const localProjects = JSON.parse(rawData);
-    if (!Array.isArray(localProjects) || localProjects.length === 0) return;
+    const cachedProjects = JSON.parse(rawData);
+    if (!Array.isArray(cachedProjects) || cachedProjects.length === 0) return;
 
-    // Normalizar datos para la tabla de Supabase
-    const payload = localProjects.map(p => ({
+    const payload = cachedProjects.map(p => ({
       id: String(p.id),
-      name: p.name || 'Sin nombre',
-      status: p.status || 'todo',
-      level: p.level || '',
-      tags: Array.isArray(p.tags) ? p.tags.join(', ') : (p.tags || ''),
+      name: p.nombre || 'Sin nombre',
+      status: p.estado || 'todo',
+      level: p.nivel || '',
+      tags: p.tags || '',
       hook: p.hook || '',
-      video: p.video || '',
-      pattern: typeof p.pattern === 'string' ? p.pattern : JSON.stringify(p.pattern || ''),
-      image: p.photo || p.image || '',
-      timer_seconds: Number(p.timer_seconds) || 0,
+      video: p.video_url || '',
+      pattern: p.patron_texto || '',
+      image: p.foto || '',
+      timer_seconds: 0,
       updated_at: new Date().toISOString()
     }));
 
@@ -684,17 +684,59 @@ async function syncProjectsToCloud() {
     });
 
     if (response.ok) {
-      console.log("☁️ Proyectos sincronizados en la nube exitosamente.");
+      console.log("☁️ Proyectos sincronizados en Supabase con éxito.");
     }
   } catch (err) {
-    console.warn("Sincronización en segundo plano pendiente:", err);
+    console.warn("Sincronización de proyectos pendiente:", err);
   }
 }
 
-// Sincronizar automáticamente al recuperar conexión a internet
-window.addEventListener('online', syncProjectsToCloud);
+// Sincronizar Hilos (Madejas)
+async function syncThreadsToCloud() {
+  if (!navigator.onLine) return;
 
-// Sincronizar al iniciar la aplicación si hay conexión
+  try {
+    const rawData = localStorage.getItem('loopie_threads_cache');
+    if (!rawData) return;
+    const cachedThreads = JSON.parse(rawData);
+    if (!Array.isArray(cachedThreads) || cachedThreads.length === 0) return;
+
+    const payload = cachedThreads.map(th => ({
+      id: String(th.id),
+      name: th.name || 'Sin nombre',
+      type: th.type || 'Algodón',
+      grams: Number(th.grams) || 0,
+      color: th.color || '#f4a8b8',
+      updated_at: new Date().toISOString()
+    }));
+
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/threads`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (response.ok) {
+      console.log("☁️ Hilos sincronizados en Supabase con éxito.");
+    }
+  } catch (err) {
+    console.warn("Sincronización de hilos pendiente:", err);
+  }
+}
+
+// Escuchar conexión Wi-Fi o datos móviles
+window.addEventListener('online', () => {
+  syncProjectsToCloud();
+  syncThreadsToCloud();
+});
+
+// Sincronizar de inmediato al arrancar si hay conexión
 if (navigator.onLine) {
   syncProjectsToCloud();
+  syncThreadsToCloud();
 }
